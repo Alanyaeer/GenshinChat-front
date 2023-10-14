@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
+import 'animate.css';
 import pinia from '@/stores/index'
 // import '@/assets/main.scss'
 // import ElementUI from 'element-ui';

@@ -1,14 +1,22 @@
 <script setup>
 import { ref } from 'vue'
+import 'animate.css';
+// import {Created} from 'vue-router'
 import {
-  User, Lock, UserFilled,CirclePlus
+  User, Lock, ArrowRightBold, ArrowLeftBold, PictureFilled
 } from '@element-plus/icons-vue'
+
+
 const formModel = ref({
   username: '',
   password: '',
   repassword: ''
 })
 const isRegister = ref(true)
+const themevalue = ref(0)
+const switchvalue = ref(0);
+
+
 //整个表单的校验规则    
 const rules = {
   // blur 代表的是， 失去焦点的时候才去校验
@@ -54,13 +62,44 @@ const rules = {
   ]
   
 }
+const changetheme = () => {
+  switchvalue.value = 1
+  if(themevalue.value == 0){
+    ElMessage({
+      showClose: true,
+      message: '切换页面',
+      type: 'warning'
+    })
+    // 刀剑圣域状态
+    // console.log(document.getElementsByClassName('container')[0].style.background);
+    document.getElementsByClassName('container')[0].style.background = "url('src/assets/login_bg2.jpg') no-repeat center / cover"
+  }
+  else {
+    // 消息提示框不用理会
+
+    ElMessage({
+      showClose: true,
+      message: '切换页面',
+      type: 'success'
+    })
+    // 其他时刻状态
+    document.getElementsByClassName('container')[0].style.background = "url('src/assets/login_bg1.jpg') no-repeat center / cover"
+  }
+  // 1.5s中才可以点击按钮， 切换页面
+  setTimeout(() => {
+    switchvalue.value = 0
+  }, 1000)
+  
+
+}
 </script>
 <template>
     <el-row class="container">
+      <!-- <h1 class="animate__flash">heelo</h1> -->
         <el-col :span="14" class="bg1"></el-col>
         <el-col :span="8">
             <div class="login">
-                <el-form
+                <el-form class="animate__animated animate__flipInX"
                     :model="formModel"
                     :rules="rules"
                     ref="form"
@@ -69,7 +108,7 @@ const rules = {
                     v-if="isRegister"
                     >
                     <el-form-item>
-                        <h1 class="title">注册</h1>
+                        <h1 class="title1">注册</h1>
                     </el-form-item>
                     <!-- 登录相关表单 -->
                     <el-form-item prop="username">
@@ -110,12 +149,27 @@ const rules = {
                         </el-button>
                     </el-form-item>
                     <el-form-item class="flex">
+                      <div class="flex">
                         <el-link type="info" :underline="false" @click="isRegister = false" class="font"> 
                         ← 返回
                         </el-link>
+                          <el-switch
+                            class="switch clicked"
+                            v-model="themevalue"
+                            @click="changetheme"
+                            style="--el-switch-on-color: #AF5F48; --el-switch-off-color: #AF5F48"
+                            :disabled="switchvalue"
+                            active-value="1"
+                            inactive-value="0"
+                            :inactive-action-icon="PictureFilled"
+                            :active-action-icon="PictureFilled"
+                          />
+                      </div>
+
                     </el-form-item>
                     </el-form>
-                    <el-form             
+                    <el-form  
+                        class="animate__animated animate__flipInX"           
                         :model="formModel"
                         :rules="rules" 
                         ref="form" 
@@ -147,42 +201,43 @@ const rules = {
                     </el-form-item>
                     <el-form-item>
                         <el-button class="button three-d"  auto-insert-space @click="login"
-                        ><p class="font">登录</p></el-button
+                        ><p class="font animate__flash animate__flash">登录</p></el-button
                         >
                     </el-form-item>
                     <el-form-item class="flex">
+                      <div class="flex">
                         <el-link type="info" :underline="false" @click="isRegister = true">
                             <!-- 注册 -->
-                            <!-- <el-icon size="25"><UserFilled /></el-icon> -->
                           <el-link type="info" :underline="false" @click="isRegister = false" class="font">
                             ← 注册
                           </el-link>
                         </el-link>
+                          <el-switch
+                            class="switch"
+                            v-model="themevalue"
+                            @click="changetheme"
+                            style="--el-switch-on-color: #AF5F48; --el-switch-off-color: #AF5F48"
+                            active-value="1"
+                            inactive-value="0"
+                            :inactive-action-icon="PictureFilled"
+                            :active-action-icon="PictureFilled"
+                          />
+                      </div>
+
                     </el-form-item>
                     </el-form>
-                            </div>
-                        </el-col>
+              </div>
+            </el-col>
         <el-col :span="2"></el-col>
     </el-row>
    </template>
    
    <style lang="scss" scoped>
    .container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    // background-image: linear-gradient(to left, #f8edec, #ecf3f4 100%);
+    height: 100vh;
     background:  url('@/assets/login_bg2.jpg') no-repeat center / cover; 
-    // filter:blur(10px)
-    // .bg1 {
-    //   background:
-    //   // url('@/assets/logo2.png') no-repeat 60% center / 240px auto,
-    //   url('@/assets/login_bg.jpg') no-repeat center / cover;
-    //   border-radius: 20px 20px 20px 20px;
-    // }
+    transition: background 0.5s ease-in-out;
+    // 登录页面
     .login{
         position: relative;
         top:15%;
@@ -202,10 +257,16 @@ const rules = {
         border-radius: 10px;
         padding-left:5%;
         padding-right:5%;
+        // 标题
         .title {
           margin: 0 auto;
           color:#AF5F48
         }
+        .title1 {
+          color: #AF5F48;
+          margin: 0 75% 5% 5%;
+        }
+        // 按钮
         .button {
             position: relative;
             width: 60%;
@@ -216,10 +277,15 @@ const rules = {
             background-color: #AF5F48;
             // border
             border-radius: 30px;
+            // 字体
             .font {
               color:white;
             }
         }
+        .button.clicked {
+          background-image: url('@/assets/login_bg1.jpg') no-repeat center / cover;
+        }
+        // 布局
         .flex {
             position: relative;
             width: 100%;
@@ -229,6 +295,21 @@ const rules = {
             .font{
               color: white;
             }
+            // 滑动开关
+            .switch {
+              opacity: 0.7;
+            }
+        }
+        .flexbottom {
+          display: flex;
+          width: 100%;
+          justify-content: space-between;
+          .switch {
+              opacity: 0.7;
+            }
+          .font{
+            color: white;
+          }
         }
         .input {
             position: relative;
@@ -249,7 +330,7 @@ const rules = {
             box-shadow: 0px 5px 0px 0px #AF5F48;
             transition: all .5s;
         }
-
+        
         .three-d:hover {
             background-color: #c0674f;
         }
@@ -259,8 +340,8 @@ const rules = {
             box-shadow: 0px 1px 0px 0px #AF5F48;
         }   
 
+
     }
    }
    
-
    </style>
