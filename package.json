@@ -13,8 +13,8 @@
     "@element-plus/icons-vue": "^2.1.0",
     "@vueup/vue-quill": "^1.2.0",
     "animate.css": "^4.1.1",
+    "axios": "^1.5.1",
     "element-plus": "^2.3.14",
-    "mockjs": "^1.1.0",
     "pinia": "^2.1.6",
     "vue": "^3.3.4",
     "vue-router": "^4.2.4"
@@ -25,6 +25,7 @@
     "@vue/eslint-config-prettier": "^8.0.0",
     "eslint": "^8.49.0",
     "eslint-plugin-vue": "^9.17.0",
+    "mockjs": "^1.1.0",
     "pinia-plugin-persistedstate": "^3.2.0",
     "prettier": "^3.0.3",
     "sass": "^1.69.3",

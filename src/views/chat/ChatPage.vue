@@ -17,7 +17,9 @@ import {
 import avatar from '@/assets/avatar_default.png'
 import { useRouter } from 'vue-router'
 // 还缺少一个请求函数
-// import { getFriend } from '@/api/getData'
+import { getFriend } from '@/api/getData'
+import  PersonCart  from '@/components/PersonCart.vue'
+import chatwindow from './components/chatwindow.vue'
 const router = useRouter()
 // import { router } from 'vue-router';
 const iconsize = ref(32)
@@ -26,6 +28,10 @@ const leftsize = ref(1)
 const middlesize = ref(5)
 const avatarUrl = ref('')
 const personList = ref([])
+const pcCurrent = ref('')
+const isShowChatWindow = ref(false)
+const personInfo = ref('')
+const chatWindowInfo = ref('')
 avatarUrl.value = avatar
 // avatarUrl.value = require.resolve('@/assets/images/avatar_default.png')
 const handleOpen = (key, keyPath) => {
@@ -36,6 +42,12 @@ const handleClose = (key, keyPath) => {
 }
 const logout = () => {
     router.push('/login')
+}
+const clickPerson = (info) => {
+    pcCurrent.value = info.id
+    isShowChatWindow.value = true
+    personInfo.value = info
+    chatWindowInfo.value = info
 }
 const Fullexpend = () => {
 
@@ -50,8 +62,22 @@ const Fullexpend = () => {
         middlesize.value = 5
     }
 }
+const personCardSort = (id)=>{
+    if(id !== personList.value[0].id){
+        console.log(id);
+        let nowPersonInfo
+        for(let i = 0; i < personList.value.length; i++){
+            nowPersonInfo = personList.value[i]
+            // 扔掉这个元素
+            personList.value.splice(i, 1)
+            break
+        }
+        在首部添加这个元素
+        personList.value.unshift(nowPersonInfo)
+    }
+}
 onMounted(async () => {
-    personList.value = await getPersonList()
+    personList.value = await getFriend ()
 })
 </script>
 
@@ -125,27 +151,53 @@ onMounted(async () => {
                     v-for="personInfo in personList"
                     :key="personInfo.id"
                     @click="clickPerson(personInfo)"
+                    
                 >
-                    <PersonCard
+                    <PersonCart
                     :personInfo="personInfo"
                     :pcCurrent="pcCurrent"
-                    ></PersonCard>
+                    ></PersonCart>
                 </div>
                 </div>
             </div>
         </el-col>
         <el-col   el-col :span="18" class="rightcomponent">
+            <!-- 不需要理会这里 -->
             <div class="rightcomponentheader">
 
             </div>
-            <div class="rightcomponentmiddle">
-                <div class="chatcontent">
 
+
+
+            <div class="rightcomponentmiddle">
+                <!-- 真正的对话框 -->
+                <div class="chatcontent">
+                    <div v-if="isShowChatWindow">
+                        <!-- 等一下再来这里操作 -->
+                        <chatwindow
+                            :chatWindowInfo="chatWindowInfo"
+                            :friendInfo="chatWindowInfo"
+                            @personCardSort="personCardSort"
+                        ></chatwindow>
+                    </div>
+                    <div v-else>
+                        <span class="emptychaticon">
+                            <!-- TODO -->
+                            <img class="iconsize" src="@/assets/snapchat.png" alt="" />
+                        </span>
+                    </div>
                 </div>
+
+
+                <!-- // 不需要理会则合理 -->
                 <div class="chatright">
 
                 </div>
             </div>
+
+
+
+            <!-- 不需要理会这里 -->
             <div class="rightcomponentbottom">
 
             </div>
@@ -270,13 +322,12 @@ onMounted(async () => {
         }
         .online-person {
             margin-top: 50px;
-            margin-left:100px;
+            margin-left:25px;
             .onlin-text {
                 padding-right: 50px;
                 color: rgb(176, 178, 189);
             }
             .person-cards-wrapper {
-                padding-left: 10px;
                 height: 65vh;
                 margin-top: 20px;
                 overflow: hidden;
@@ -294,7 +345,7 @@ onMounted(async () => {
         background-color: #272A37;
         position: relative;
         .rightcomponentheader{
-            height: 20%;
+            height: 3%;
             background-color: #272A37;
         }
         .rightcomponentmiddle {
@@ -304,9 +355,18 @@ onMounted(async () => {
             position: relative;
             border-radius: 15px;
             .chatcontent {
-                background-color: #323644;
+                background-color: #272A37;
                 width: 96%;
                 border-radius: 15px;
+            }
+            .emptychaticon{
+                position: absolute;
+                left: 37%;
+                top: 5%;
+                .iconsize{
+                    width: 400px;
+                    height: 400px;
+                }
             }
             .chatright {
                 background-color: #272A37;
