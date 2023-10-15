@@ -7,13 +7,16 @@ import { getChatMsg } from "../../../api/getData.js";
 import HeadPortrait from "../../../components/HeadPortrait.vue";
 import Emoji from "../../../components/Emoji.vue";
 import FileCard from "../../../components/FileCard.vue";
-import { ref, onMounted, watch ,defineProps, defineEmits} from 'vue'
-import { ElMessage } from "element-plus";
+import { ref, onMounted, watch ,defineProps, defineEmits, nextTick, getCurrentInstance} from 'vue'
+
+import { VideoCamera,Phone, Document, PictureRounded } from '@element-plus/icons-vue';
 // 声明变量
 const chatList = ref([])
-const inputMsg = ref("")
+const inputMsg = ref("")  
 const showEmoji = ref(false)
 const srcImgList = ref([])
+const chatContent = ref(null)
+// const instance = getCurrentInstance()
 // 父组件传递过来的变量
 const props = defineProps({
   friendInfo: Object,
@@ -22,21 +25,19 @@ const props = defineProps({
 // 发送消息给父组件
 const emit = defineEmits(['personCardSort'])
 // methods
-const friendInfo = props.friendInfo
 // 获取聊天记录
 const getFriendChatMsg = () => {
-  console.log(friendInfo);
   let params = {
-    frinedId: friendInfo.id,
+    frinedId: props.friendInfo.id,
   };
   getChatMsg(params).then((res) => {
-    this.chatList = res;
-    this.chatList.forEach((item) => {
+    chatList.value = res;
+    chatList.value.forEach((item) => {
       if (item.chatType == 2 && item.extend.imgType == 2) {
-        this.srcImgList.push(item.msg);
+        srcImgList.value.push(item.msg);
       }
     });
-    this.scrollBottom();
+    scrollBottom();
 
   });
 }
@@ -47,10 +48,11 @@ const sendMsg = (msgList) => {
 }
 //获取窗口高度并滚动至最底层
 const scrollBottom = () => {
-  this.$nextTick(() => {
-    const scrollDom = this.$refs.chatContent;
-    animation(scrollDom, scrollDom.scrollHeight - scrollDom.offsetHeight);
-  });
+  nextTick(()=>{
+    const scrollDom = chatContent.value;
+    // animation(scrollDom, scrollDom.scrollHeight - scrollDom.offsetHeight);
+    scrollDom.scrollTop = scrollDom.scrollHeight;
+  })
 }
 // 关闭标签页
 const clickEmoji = () => {
@@ -60,7 +62,9 @@ const clickEmoji = () => {
 const sendText = () => {
   if (inputMsg.value) {
     let chatMsg = {
-      headImg: require("@/assets/img/head_portrait.jpg"),
+    // 就是本人的信息
+
+      headImg: new URL("@/assets/img/head_portrait.jpg", import.meta.url).href,
       name: "大毛是小白",
       time: "09：12 AM",
       msg: inputMsg.value,
@@ -70,7 +74,7 @@ const sendText = () => {
     sendMsg(chatMsg);
 
     // 发送给父组件的消息
-    emit('personCardSort',friendInfo.id)
+    emit('personCardSort',props.friendInfo.id)
     inputMsg.value = "";
   } else {
     ElMessage.warning("消息不能为空")
@@ -78,15 +82,96 @@ const sendText = () => {
 }
 // 发送表情
 const sendEmoji = (msg) => {
-  
+  let chatEmoji = {
+      headImg: new URL("@/assets/img/head_portrait.jpg", import.meta.url).href,
+      name: "大毛是小白",
+      time: "09：12 AM",
+      msg: msg,
+      chatType: 1, //信息类型，0文字，1图片
+      extend: {
+        imgType: 1, //(1表情，2本地图片)
+      },
+      uid: "1001",
+    };
+    sendMsg(chatEmoji);
+    clickEmoji();
+
 }
 // 发送本地图片
-const sendImg = (msg) => {
-
+const sendImg = (e) => {
+  // console.log(e.target.files);
+  let chatfiles = {
+    headImg: new URL("@/assets/img/head_portrait.jpg", import.meta.url).href,
+    name: "大毛是小白",
+    time: "09：12 AM",
+    msg: "",
+    chatType: 1, //信息类型，0文字，1图片, 2文件
+    extend: {
+      imgType: 2, //(1表情，2本地图片)
+    },
+    uid: "1001",
+  };
+  let files = e.target.files[0];
+  if (!e || !window.FileReader) return;
+  let reader = new FileReader();
+  reader.readAsDataURL(files);
+  reader.onloadend = (es) => {
+    console.log(reader.result);
+    chatfiles.msg = es.target.result; //赋值
+    srcImgList.value.push(chatfiles.msg);
+  };
+  console.log(chatfiles);
+  setTimeout(()=>{
+    sendMsg(chatfiles);
+  }, 100)
+  e.target.files = null;
 }
 // 发送文件
-const sendFile = (msg) => { 
-
+const sendFile = (e) => { 
+  let chatFile = {
+    headImg: new URL("@/assets/img/head_portrait.jpg", import.meta.url).href,
+    name: "大毛是小白",
+    time: "09：12 AM",
+    msg: "",
+    chatType: 2, //信息类型，0文字，1图片, 2文件
+    extend: {
+      fileType: "", //(1word，2excel，3ppt，4pdf，5zpi, 6txt)
+    },
+    uid: "1001",
+  };
+  let files = e.target.files[0]; //图片文件名
+  chatFile.msg = files;
+  // console.log(files);
+  if (files) {
+    switch (files.type) {
+      case "application/msword":
+      case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        chatFile.extend.fileType = 1;
+        break;
+      case "application/vnd.ms-excel":
+      case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+        chatFile.extend.fileType = 2;
+        break;
+      case "application/vnd.ms-powerpoint":
+      case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+        chatFile.extend.fileType = 3;
+        break;
+      case "application/pdf":
+        chatFile.extend.fileType = 4;
+        break;
+      case "application/zip":
+      case "application/x-zip-compressed":
+        chatFile.extend.fileType = 5;
+        break;
+      case "text/plain":
+        chatFile.extend.fileType = 6;
+        break;
+      default:
+        chatFile.extend.fileType = 0;
+    }
+    sendMsg(chatFile);
+    e.target.files = null;
+  }
 }
 // 发送语音
 const telephone = () => {
@@ -96,17 +181,20 @@ const telephone = () => {
 const video = () => {
   ElMessage.info("视频功能开发中")
 }
-
 // Mounted时期
 onMounted(()=>{
+
   getFriendChatMsg()
 })
 
-// watch 
-watch(friendInfo, () => {
-  getFriendChatMsg()
-})
-
+watch(
+  () => props.friendInfo,
+  () => {
+    getFriendChatMsg()
+  },
+  {deep: true},
+  {immediate: true}
+)
 </script>
 
 
@@ -114,20 +202,24 @@ watch(friendInfo, () => {
   <div class="chat-window">
     <div class="top">
       <div class="head-pic">
-        <HeadPortrait :imgUrl="friendInfo.headImg"></HeadPortrait>
+        <HeadPortrait :imgUrl="props.friendInfo.headImg"></HeadPortrait>
       </div>
       <div class="info-detail">
-        <div class="name">{{ friendInfo.name }}</div>
-        <div class="detail">{{ friendInfo.detail }}</div>
+        <div class="name">{{ props.friendInfo.name }}</div>
+        <div class="detail">{{ props.friendInfo.detail }}</div>
       </div>
       <div class="other-fun">
-        <span class="iconfont icon-shipin" @click="video"> </span>
-        <span class="iconfont icon-gf-telephone" @click="telephone"></span>
+        <span  @click="video"> 
+          <el-icon  class="other_fun_icon"><VideoCamera /></el-icon> 
+        </span>
+        <span @click="telephone">
+          <el-icon class="other_fun_icon"><Phone /></el-icon>
+        </span>
         <label for="docFile">
-          <span class="iconfont icon-wenjian"></span>
+          <el-icon class="other_fun_icon"><Document /></el-icon>
         </label>
         <label for="imgFile">
-          <span class="iconfont icon-tupian"></span>
+          <el-icon class="other_fun_icon"><PictureRounded /></el-icon>
         </label>
         <input
           type="file"
@@ -153,7 +245,8 @@ watch(friendInfo, () => {
             <div class="chat-text" v-if="item.chatType == 0">
               {{ item.msg }}
             </div>
-            <div class="chat-img" v-if="item.chatType == 1">
+            <div class="chat-img" v-if="item.chatType == 1" >
+              
               <img
                 :src="item.msg"
                 alt="表情"
@@ -268,16 +361,23 @@ watch(friendInfo, () => {
     .other-fun {
       float: right;
       margin-top: 20px;
-      span {
-        margin-left: 30px;
-        cursor: pointer;
-      }
+      font-size: 30px;
       // .icon-tupian {
 
       // }
       input {
         display: none;
       }
+      .other_fun_icon{
+        color:#757889;
+        margin-left: 30px;
+        cursor: pointer;
+      }
+      .other_fun_icon:hover{
+        color:#1D90F5;
+        
+      }
+
     }
   }
   .botoom {

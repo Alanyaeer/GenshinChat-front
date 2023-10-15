@@ -14,12 +14,13 @@ import {
 
 // import { QuillEditor } from '@vueup/vue-quill'
 // import {CommPage} from './components/CommPage.vue'
-import avatar from '@/assets/avatar_default.png'
+import avatar from '@/assets/img/head_portrait4.jpg'
 import { useRouter } from 'vue-router'
 // 还缺少一个请求函数
 import { getFriend } from '@/api/getData'
 import  PersonCart  from '@/components/PersonCart.vue'
 import chatwindow from './components/chatwindow.vue'
+import { Plus } from '@element-plus/icons-vue'
 const router = useRouter()
 // import { router } from 'vue-router';
 const iconsize = ref(32)
@@ -44,9 +45,12 @@ const logout = () => {
     router.push('/login')
 }
 const clickPerson = (info) => {
+    
     pcCurrent.value = info.id
     isShowChatWindow.value = true
     personInfo.value = info
+    personCardSort(info.id)
+    // console.log(personInfo.value);
     chatWindowInfo.value = info
 }
 const Fullexpend = () => {
@@ -62,18 +66,26 @@ const Fullexpend = () => {
         middlesize.value = 5
     }
 }
+// TODO, 记得退出的时候要记录当前的数组顺寻
 const personCardSort = (id)=>{
     if(id !== personList.value[0].id){
-        console.log(id);
-        let nowPersonInfo
-        for(let i = 0; i < personList.value.length; i++){
-            nowPersonInfo = personList.value[i]
+        let nowPersonInfo = {}
+        let isSort = false
+        for(let i = 1; i < personList.value.length; i++){
+            if(id === personList.value[i].id){
+                nowPersonInfo = personList.value[i]
             // 扔掉这个元素
-            personList.value.splice(i, 1)
-            break
+                personList.value.splice(i, 1)
+                isSort = true
+                break
+            }
+
         }
-        在首部添加这个元素
-        personList.value.unshift(nowPersonInfo)
+        // 在首部添加这个元素
+        if(isSort === true){
+            personList.value.unshift(nowPersonInfo)
+            document.getElementsByClassName('person-cards-wrapper')[0].scrollTo(0, 'smooth')
+        }
     }
 }
 onMounted(async () => {
@@ -146,6 +158,7 @@ onMounted(async () => {
             <h1 class="title">WeChat</h1>
             <div class="online-person">
                 <span class="onlin-text">聊天列表</span>
+                <span  style="padding-left: 100px; color: rgb(176, 178, 189)">{{ personList.length}} / ?</span>
                 <div class="person-cards-wrapper">
                 <div
                     v-for="personInfo in personList"
@@ -157,6 +170,9 @@ onMounted(async () => {
                     :personInfo="personInfo"
                     :pcCurrent="pcCurrent"
                     ></PersonCart>
+                </div>
+                <div class="person-card">
+                    <el-icon :size="40" class="iconcolor"><Plus /></el-icon>
                 </div>
                 </div>
             </div>
@@ -175,7 +191,7 @@ onMounted(async () => {
                     <div v-if="isShowChatWindow">
                         <!-- 等一下再来这里操作 -->
                         <chatwindow
-                            :chatWindowInfo="chatWindowInfo"
+                            
                             :friendInfo="chatWindowInfo"
                             @personCardSort="personCardSort"
                         ></chatwindow>
@@ -280,11 +296,7 @@ onMounted(async () => {
         width: 200px;
         min-height: 400px;
     }
-    .leftcomponent {
-        background-color:#232D4A;
-        // -webkit-backface-visibility: hidden;
-        // transition: 0.62s;
-        // transition-delay: 1s; 
+    .leftcomponent { 
         .iconbg {
             color: #C3C7D1;
 
@@ -333,11 +345,53 @@ onMounted(async () => {
                 overflow: hidden;
                 overflow-y: scroll;
                 box-sizing: border-box;
+                // transition: all 1s;
                 &::-webkit-scrollbar {
-                width: 0; /* Safari,Chrome 隐藏滚动条 */
-                height: 0; /* Safari,Chrome 隐藏滚动条 */
-                display: none; /* 移动端、pad 上Safari，Chrome，隐藏滚动条 */
+                    width: 0; /* Safari,Chrome 隐藏滚动条 */
+                    height: 0; /* Safari,Chrome 隐藏滚动条 */
+                    display: none; /* 移动端、pad 上Safari，Chrome，隐藏滚动条 */
                 }
+                .person-card {
+                    width: 250px;
+                    height: 80px;
+                    border-radius: 10px;
+                    background-color: rgb(50, 54, 68);
+                    position: relative;
+                    margin: 25px 0;
+                    cursor: pointer;
+                    font-size: 20px;
+                    &:hover {
+                        background-color: #1d90f5;
+                        transition: 0.3s;
+                        box-shadow: 0px 0px 10px 0px rgba(0, 136, 255);
+                        // box-shadow:  0 5px 20px rgba(251, 152, 11, .5);
+                        .info {
+                        .info-detail {
+                            .detail {
+                            color: #fff;
+                            }
+                        }
+                        }
+                    }
+                    position: relative;
+                    .iconcolor {
+                        left: 42%;
+                        top :26%;
+                        color:whitesmoke
+                    }
+                }
+                    .activeCard {
+                        background-color: #1d90f5;
+                        transition: 0.3s;
+                        box-shadow: 3px 2px 10px 0px rgba(0, 136, 255);
+                        .info {
+                        .info-detail {
+                            .detail {
+                            color: #fff;
+                            }
+                        }
+                        }
+                    }
             }
         }
     }
@@ -361,8 +415,8 @@ onMounted(async () => {
             }
             .emptychaticon{
                 position: absolute;
-                left: 37%;
-                top: 5%;
+                left: 35%;
+                top: 30%;
                 .iconsize{
                     width: 400px;
                     height: 400px;

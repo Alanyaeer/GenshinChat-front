@@ -24,7 +24,7 @@ let friendList = Mock.mock(
             detail: "我是大毛",
             lastMsg: "to do",
             id: "1002",
-            headImg: new URL("@/assets/head_portrait1.jpg", import.meta.url).href,
+            headImg: new URL("@/assets/img/head_portrait4.jpg", import.meta.url).href,
 
         },
         {
@@ -33,7 +33,7 @@ let friendList = Mock.mock(
             detail: "我是小毛",
             lastMsg: "dada dw ertgthy juy",
             id: "1003",
-            headImg: new URL("@/assets/head_portrait2.jpg", import.meta.url).href,
+            headImg: new URL("@/assets/img/head_portrait5.jpg", import.meta.url).href,
 
         },
         {
@@ -42,8 +42,80 @@ let friendList = Mock.mock(
             detail: "我是小王",
             lastMsg: "大萨达萨达所大大萨达",
             id: "1004",
-            headImg: new URL("@/assets/head_portrait3.jpg", import.meta.url).href,
+            headImg: new URL("@/assets/img/head_portrait6.jpg", import.meta.url).href,
 
+        },
+        {
+            img: "",
+            name: "赵六",
+            detail: "我是赵六",
+            lastMsg: "哇哈哈哈哈哈哈",
+            id: "1005",
+            headImg: new URL("@/assets/img/head_portrait7.jpg", import.meta.url).href,
+        },
+        {
+            img: "",
+            name: "张三",
+            detail: "我是张三",
+            lastMsg: "阿巴斯的后果的",
+            id: "1006",
+            headImg: new URL("@/assets/img/head_portrait8.jpg", import.meta.url).href,
+        },
+        {
+            img: "",
+            name: "王文举",
+            detail: "我是王文举",
+            lastMsg: "啊递归传播得",
+            id: "1007",
+            headImg: new URL("@/assets/img/head_portrait9.jpg", import.meta.url).href,
+        },
+        {
+            img: "",
+            name: "苏吹",
+            detail: "我是苏吹",
+            lastMsg: "上次护照吕大巴搜集",
+            id: "1008",
+            headImg: new URL("@/assets/img/head_portrait10.jpg", import.meta.url).href,
+        },
+        {
+            img: "",
+            name: "阿萨",
+            detail: "我是阿萨",
+            lastMsg: "出租租个牛的",
+            id: "1009",
+            headImg: new URL("@/assets/img/head_portrait11.jpg", import.meta.url).href,
+        },
+        {
+            img: "",
+            name: "战锤",
+            detail: "我是战锤",
+            lastMsg: "安科技公司仓库吧",
+            id: "1010",
+            headImg: new URL("@/assets/img/head_portrait12.jpg", import.meta.url).href,
+        },
+        {
+            img: "",
+            name: "安东尼",
+            detail: "我是安东尼发",
+            lastMsg: "看见这次就随便",
+            id: "1011",
+            headImg: new URL("@/assets/img/head_portrait13.jpg", import.meta.url).href,
+        },
+        {
+            img: "",
+            name: "安沙",
+            detail: "我是安沙",
+            lastMsg: "成都你哦在",
+            id: "1012",
+            headImg: new URL("@/assets/img/head_portrait14.jpg", import.meta.url).href,
+        },
+        {
+            img: "",
+            name: "安雅",
+            detail: "我是安雅",
+            lastMsg: "看哎是非常比",
+            id: "1013",
+            headImg: new URL("@/assets/img/head_portrait15.jpg", import.meta.url).href,
         },
     ]
 )
@@ -60,7 +132,7 @@ let chatMsg1002 = Mock.mock(
         },
 
         {
-            headImg: new URL("@/assets/img/head_portrait1.jpg", import.meta.url).href,
+            headImg: new URL("@/assets/img/head_portrait4.jpg", import.meta.url).href,
             name: "大毛",
             time: "09：12 AM",
             msg: " 怎么了？",
@@ -76,7 +148,7 @@ let chatMsg1002 = Mock.mock(
             uid: "1001",
         },
         {
-            headImg: new URL("@/assets/img/head_portrait1.jpg", import.meta.url).href,
+            headImg: new URL("@/assets/img/head_portrait4.jpg", import.meta.url).href,
             name: "大毛",
             time: "09：12 AM",
             msg: "别问",
@@ -118,7 +190,7 @@ let chatMsg1003 = Mock.mock(
             uid: "1001",
         },
         {
-            headImg: new URL("@/assets/img/head_portrait2.jpg", import.meta.url).href,
+            headImg: new URL("@/assets/img/head_portrait5.jpg", import.meta.url).href,
             name: "小毛",
             time: "09：12 AM",
             msg: "吃饭",
@@ -134,7 +206,7 @@ let chatMsg1003 = Mock.mock(
             uid: "1001",
         },
         {
-            headImg: new URL("@/assets/img/head_portrait2.jpg", import.meta.url).href,
+            headImg: new URL("@/assets/img/head_portrait5.jpg", import.meta.url).href,
             name: "小毛",
             time: "09：12 AM",
             msg: "蛋炒饭",
@@ -150,7 +222,7 @@ let chatMsg1003 = Mock.mock(
             uid: "1001",
         },
         {
-            headImg: new URL("@/assets/img/head_portrait2.jpg", import.meta.url).href,
+            headImg: new URL("@/assets/img/head_portrait5.jpg", import.meta.url).href,
             name: "小毛",
             time: "09：12 AM",
             msg: "你说呢",
@@ -158,7 +230,7 @@ let chatMsg1003 = Mock.mock(
             uid: "1002", //uid
         },
         {
-            headImg: new URL("@/assets/img/head_portrait2.jpg", import.meta.url).href,
+            headImg: new URL("@/assets/img/head_portrait5.jpg", import.meta.url).href,
             name: "小毛",
             time: "09：12 AM",
             msg: new URL("@/assets/img/emoji/slightly-smiling-face.png", import.meta.url).href,
@@ -192,7 +264,7 @@ let chatMsg1004 = Mock.mock(
             uid: "1001",
         },
         {
-            headImg: new URL("@/assets/img/head_portrait3.jpg", import.meta.url).href,
+            headImg: new URL("@/assets/img/head_portrait6.jpg", import.meta.url).href,
             name: "小王",
             time: "09：12 AM",
             msg: " 21312大萨达萨达",
@@ -208,7 +280,7 @@ let chatMsg1004 = Mock.mock(
             uid: "1001",
         },
         {
-            headImg: new URL("@/assets/img/head_portrait3.jpg", import.meta.url).href,
+            headImg: new URL("@/assets/img/head_portrait6.jpg", import.meta.url).href,
             name: "小王",
             time: "09：12 AM",
             msg: "大萨达萨达所大大萨达",
