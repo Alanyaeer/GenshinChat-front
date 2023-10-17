@@ -27,6 +27,10 @@ const router = createRouter({
     {
       path: '/404',
       component: ()=> import('@/views/error/ErrorPage.vue')
+    },
+    {
+      path: '/emoji',
+      component: ()=> import('@/components/Emoji.vue')
     }
   ]
 })

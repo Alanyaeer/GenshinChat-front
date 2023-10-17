@@ -4,8 +4,14 @@ export const useUserStore = defineStore(
   'chat-user',
   () => {
     const token = ref('')
+    const username = ref('')
+    const userimg = ref('')
+    const userid = ref('')
+    const userdetail = ref('')
+
+
     return {
-        token
+        token, username, userimg, userid
     }
   },
   {
