@@ -8,8 +8,9 @@ const router = createRouter({
       component: () => import('@/views/login/LoginPage.vue')
     },
     {
-      path: '/test',
-      component: () => import('@/views/TestPage.vue')
+      path: '/manage',
+
+      component: () => import('@/views/manage/ManagePage.vue')
     },
     {
       path: '/chat',
@@ -18,11 +19,26 @@ const router = createRouter({
     {
       path: '/',
       redirect: '/login'
+    },
+    {
+      path: '/test',
+      component: () => import('@/views/TestPage.vue')
+    },
+    {
+      path: '/404',
+      component: ()=> import('@/views/error/ErrorPage.vue')
     }
   ]
 })
-// router.beforeEach((to) =>{
-//   const useStore = useUserStore()
-//   if(useStore.token === '' && to.path !== '/login')return '/login'
-// })
+router.beforeEach((to, from, next) =>{
+  if(to.matched.length === 0){
+    next('/404')
+  }
+  else{
+    next()
+  }
+  // const useStore = useUserStore()
+
+  // if(useStore.token === '' && to.path !== '/login')return '/login'
+})
 export default router

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted} from 'vue'
+import { ref, onMounted, watch} from 'vue'
 import {
   Document,
   Menu as IconMenu,
@@ -9,7 +9,9 @@ import {
   Search,
   CirclePlus,
   FullScreen,
-  CloseBold 
+  CloseBold, 
+  User, 
+    Delete
 } from '@element-plus/icons-vue'
 
 // import { QuillEditor } from '@vueup/vue-quill'
@@ -21,26 +23,30 @@ import { getFriend } from '@/api/getData'
 import  PersonCart  from '@/components/PersonCart.vue'
 import chatwindow from './components/chatwindow.vue'
 import { Plus } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import ManagePage from '../manage/ManagePage.vue'
 const router = useRouter()
 // import { router } from 'vue-router';
 const iconsize = ref(32)
 const isCollapse = ref(true)   
 const leftsize = ref(1)
 const middlesize = ref(5)
+const rightsize = ref(18)
 const avatarUrl = ref('')
+const ismoving = ref(false)
 const personList = ref([])
 const pcCurrent = ref('')
 const isShowChatWindow = ref(false)
 const personInfo = ref('')
 const chatWindowInfo = ref('')
+const isshowDialog = ref(false)
+const userInfo = ref('')
+const typeDialog = ref(1)
+// 判断消息的来源
+const direction = ref(false)
 avatarUrl.value = avatar
 // avatarUrl.value = require.resolve('@/assets/images/avatar_default.png')
-const handleOpen = (key, keyPath) => {
-  console.log(key, keyPath)
-}
-const handleClose = (key, keyPath) => {
-  console.log(key, keyPath)
-}
+
 const logout = () => {
     router.push('/login')
 }
@@ -54,7 +60,7 @@ const clickPerson = (info) => {
     chatWindowInfo.value = info
 }
 const Fullexpend = () => {
-
+    ismoving.value = true
     isCollapse.value = !isCollapse.value
     if(isCollapse.value === false){
         middlesize.value = 3
@@ -63,7 +69,11 @@ const Fullexpend = () => {
     }
     else {
         leftsize.value = 1
-        middlesize.value = 5
+        setTimeout(()=>{
+            middlesize.value = 5
+
+        }, 500)
+
     }
 }
 // TODO, 记得退出的时候要记录当前的数组顺寻
@@ -88,18 +98,53 @@ const personCardSort = (id)=>{
         }
     }
 }
+// // 修改数据或者增添数据
+// const DialogEvent = () => {
+//     // type 类型
+
+//         // 第一种就是修改自己的头像
+//             // 修改头像成功
+//             ElMessage.success('修改头像成功')
+
+//         // 第二种增添好友
+//             // 调用 PersonCardSort 方法将他往上移动
+//             ElMessage.success('增添好友成功')
+//     // 发送提示
+// }
+// 点击后清空dialog
+const closeDialog = () => {
+    isshowDialog.value = false
+}
+// 增添好友触发
+const manage = (id) => {
+    typeDialog.value = id
+    isshowDialog.value = true
+}
 onMounted(async () => {
     personList.value = await getFriend ()
 })
+// watch(
+//   () => isshowDialog,
+//   () => {
+//     DialogEvent()
+//   }
+// )
 </script>
 
 <template>
-    <el-row class="chatPageheader">
+        <!-- zoomIn -->
+        <Transition>
+            <ManagePage v-if="isshowDialog" @closeDialog="closeDialog" :come = "typeDialog" ></ManagePage>
+        </Transition>
+        
+
+        <el-row class="chatPageheader">
         <div>
             <el-avatar
                 class="mr-3"
-                :size="32"
+                :size="45"
                 :src="avatarUrl"
+               
             />
         </div>
         <div class="search-box">
@@ -108,42 +153,29 @@ onMounted(async () => {
                 <i class="fas fa-search"><el-icon :size="20"><Search /></el-icon></i>
             </a>
         </div>
-        <div> 
+        <div style="padding-top: 0.5%;"> 
             <el-icon :size="iconsize"  class="specalforicon" @click="logout"><SwitchButton /></el-icon>
         </div>
     </el-row>
     <el-row class="chatPage">
+
+
         <el-col :span="leftsize" class="leftcomponent"> 
-            <el-menu
-            default-active="2"
-            :collapse="isCollapse"
-            @open="handleOpen"
-            @close="handleClose"
-            :collapse-transition="false"
-            class="el-menu"
-            text-color="#fff"
-        >
-            <el-menu-item index="0"  class="submenubg">
-                <el-icon class="iconbg" @click="Fullexpend"><FullScreen/></el-icon>
-                <template #title>收缩</template>
-            </el-menu-item>
-            <el-menu-item index="2"  class="submenubg">
-            <el-icon class="iconbg"><icon-menu /></el-icon>
-            <template #title>管理</template>
-            </el-menu-item>
-            <el-menu-item index="3"  class="submenubg">
-            <el-icon class="iconbg"><setting /></el-icon>
-            <template #title>设置</template>
-            </el-menu-item>
-            <el-menu-item index="4"  class="submenubg">
-            <el-icon class="iconbg"><CirclePlus /></el-icon>
-            <template #title>添加</template>
-            </el-menu-item>
-            <el-menu-item index="5"  class="submenubg" @click="logout">
-            <el-icon class="iconbg" ><SwitchButton /></el-icon>
-            <template #title>注销</template>
-            </el-menu-item>
-        </el-menu>
+
+            <!-- 扩展功能 -->
+            <el-icon class="iconbg" @click="Fullexpend"><FullScreen/>
+            </el-icon>
+            <!-- 管理自己的状态 -->
+            <el-icon class="iconbg" @click="manage(1)"><User /></el-icon>
+            <!-- 添加好友 -->
+            <el-icon class="iconbg" @click="manage(2)"><CirclePlus /></el-icon>
+            <!-- 设置 -->
+            <el-icon class="iconbg" @click="manage(3)"><Delete /></el-icon>
+            <!-- 设置 -->
+            <el-icon class="iconbg" @click="manage(4)"><Search/></el-icon>
+            <!-- 结束 -->
+            <el-icon class="iconbg" @click="logout"><SwitchButton /></el-icon>
+            <!-- <div class="underline"> -->
 
         </el-col>
         <!-- 中间的列表选择框 -->
@@ -159,25 +191,30 @@ onMounted(async () => {
             <div class="online-person">
                 <span class="onlin-text">聊天列表</span>
                 <span  style="padding-left: 100px; color: rgb(176, 178, 189)">{{ personList.length}} / ?</span>
-                <div class="person-cards-wrapper">
-                <div
-                    v-for="personInfo in personList"
-                    :key="personInfo.id"
-                    @click="clickPerson(personInfo)"
-                    
-                >
-                    <PersonCart
-                    :personInfo="personInfo"
-                    :pcCurrent="pcCurrent"
-                    ></PersonCart>
-                </div>
-                <div class="person-card">
-                    <el-icon :size="40" class="iconcolor"><Plus /></el-icon>
-                </div>
-                </div>
+                <!-- <Transition> -->
+                    <div class="person-cards-wrapper">
+                    <div
+                        v-for="personInfo in personList"
+                        :key="personInfo.id"
+                        @click="clickPerson(personInfo)"
+                        
+                    >
+                        <PersonCart
+                        :personInfo="personInfo"
+                        :pcCurrent="pcCurrent"
+                        ></PersonCart>
+                    </div>
+                    <!-- // 添加卡片 -->
+                    <div class="person-card" @click="manage(2)">
+                        <el-icon :size="40" class="iconcolor"><CirclePlus/></el-icon>
+                        
+                    </div>
+                    </div>
+                <!-- </Transition> -->
+
             </div>
         </el-col>
-        <el-col   el-col :span="18" class="rightcomponent">
+        <el-col   el-col :span="rightsize" class="rightcomponent">
             <!-- 不需要理会这里 -->
             <div class="rightcomponentheader">
 
@@ -222,14 +259,34 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
+// .changeshow-enter-active{
+//     animation: animate__zoomIn;
+//     animation-duration: 1s;
+// }
+// .chageshow-leave-active{
+//     animation: animate__zoomOut;
+//     animation-duration: 1s;
+// }
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 1s ease;
+//   animation: zoomIn;
+//   animation-duration: 1s;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
 .chatPageheader{
     // background-color: #2e3b62;
     display: flex;
     height: 7vh;
-    padding-top: 0.5%;
-    padding-left: 1.25%;
+    padding-top: 0.2%;
+    padding-left: 0.8%;
     padding-right: 1.25%;
-    background-image: linear-gradient(to right,  #232D4A,  #4f66ac);
+    // background-image: linear-gradient(to right,  #232D4A,  #4f66ac);
+    background-color: #323644;
     justify-content: space-between;
 
 
@@ -288,15 +345,30 @@ onMounted(async () => {
     }
 
 }
+
 .chatPage{
+
     height: 93vh;
-    background-color: #232D4A;
-     
+    background-color: #323644;
     .el-menu-vertical-demo:not(.el-menu--collapse) {
         width: 200px;
         min-height: 400px;
     }
     .leftcomponent { 
+        transition: 0.5s;
+        padding-top : 5%;
+
+        // background-image: linear-gradient(to bottom,  #232D4A,  #4f66ac);
+        background-color: #323644;
+        font-size: 40px;
+        display: flex;  
+        gap : 10%;
+        padding-left: 0.7%;
+        flex-direction: column;
+        height: 93vh;
+        opacity: .7;
+        cursor: pointer;
+        -webkit-text-stroke: 1px #fff;
         .iconbg {
             color: #C3C7D1;
 
@@ -304,27 +376,15 @@ onMounted(async () => {
         .iconbg:hover{
             // background-image: linear-gradient(to right, #336DF4, #33D6C0);
             color: #336DF4;
+            filter: drop-shadow(0 0 10px #336DF4) drop-shadow(0 0 20px #336DF4);
         
         }
-        .submenubg {
-            background: #232D4A;
-            size:100
-            
-        }
-        .el-menu {
-        // 解决1px elementui出现展开后子菜单宽度多出1px问题
-            border: none;
-            border-right-width: 0;
-            // height: 93vh;
-        }
-        .heightfull {
-            transition: 0.62s;  
-
-            height: 93vh;
-        }
+       
     }
     .middlecomponent{
+        transition: 0.5s;
         background-color: #272A37;
+        // background-color: rgb(219, 200, 200);
         padding-left: 1%;
         border-color:#232D4A;
         border-radius: 30px 0% 0% 0%;
@@ -397,6 +457,7 @@ onMounted(async () => {
     }
     .rightcomponent {
         background-color: #272A37;
+        // background-color: rgb(219, 200, 200);
         position: relative;
         .rightcomponentheader{
             height: 3%;

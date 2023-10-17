@@ -72,7 +72,20 @@ const changetheme = () => {
     })
     // 刀剑圣域状态
     // console.log(document.getElementsByClassName('container')[0].style.background);
-    document.getElementsByClassName('container')[0].style.background = "url('src/assets/login_bg2.jpg') no-repeat center / cover"
+    const todo = document.getElementsByClassName('container')[0].style
+    const todo1 = document.getElementsByClassName('title1')[0].style
+    const todo2 = document.getElementsByClassName('button')[0].style
+    const todo3 = document.getElementsByClassName('three-d')[0].style
+    todo.background = "url('src/assets/login_bg2.jpg') no-repeat center / cover"
+    todo1.color = "#AF5F48"
+    todo2.background = "#AF5F48"
+    todo3.textShadow = "-1px 1px 1px rgb(209 132 0),\
+                  -1px 1px 1px rgb(209 132 0),\
+                  -1px 1px 1px rgb(209 132 0),\
+                  -1px 1px 1px rgb(209 132 0),\
+                  -1px 1px 1px rgb(209 132 0),\
+                  -1px 1px 1px rgb(209 132 0)"
+    todo3.boxShadow = "0px 5px 0px 0px #AF5F48"
   }
   else {
     // 消息提示框不用理会
@@ -80,10 +93,23 @@ const changetheme = () => {
     ElMessage({
       showClose: true,
       message: '切换页面',
-      type: 'success'
-    })
+      type: 'success'    })
+    const todo = document.getElementsByClassName('container')[0].style
+    const todo1 = document.getElementsByClassName('title1')[0].style
+    const todo2 = document.getElementsByClassName('button')[0].style
+    const todo3 = document.getElementsByClassName('three-d')[0].style
     // 其他时刻状态
-    document.getElementsByClassName('container')[0].style.background = "url('src/assets/login_bg1.jpg') no-repeat center / cover"
+    todo.background = "url('src/assets/login_bg3.jpg') no-repeat center / cover"
+    todo1.color = "rgb(233,240,191)"
+    todo2.background = "rgb(43,66,30)"
+    console.log(todo3)
+    todo3.textShadow = "-1px 1px 1px rgb(43 66 30),\
+                  -1px 1px 1px rgb(43 66 30),\
+                  -1px 1px 1px rgb(43 66 30),\
+                  -1px 1px 1px rgb(43 66 30),\
+                  -1px 1px 1px rgb(43 66 30),\
+                  -1px 1px 1px rgb(43 66 30)"
+    todo3.boxShadow = "0px 5px 0px 0px rgb(43 66 30)"
   }
   // 1.5s中才可以点击按钮， 切换页面
   setTimeout(() => {
@@ -99,7 +125,7 @@ const changetheme = () => {
         <el-col :span="14" class="bg1"></el-col>
         <el-col :span="8">
             <div class="login">
-                <el-form class="animate__animated animate__flipInX"
+                <el-form class="el-form animate__animated animate__flipInX"
                     :model="formModel"
                     :rules="rules"
                     ref="form"
@@ -153,11 +179,11 @@ const changetheme = () => {
                         <el-link type="info" :underline="false" @click="isRegister = false" class="font"> 
                         ← 返回
                         </el-link>
-                          <el-switch
+                        <el-switch
                             class="switch clicked"
                             v-model="themevalue"
                             @click="changetheme"
-                            style="--el-switch-on-color: #AF5F48; --el-switch-off-color: #AF5F48"
+                            style="--el-switch-on-color: rgb(115,145,93); --el-switch-off-color: #AF5F48"
                             :disabled="switchvalue"
                             active-value="1"
                             inactive-value="0"
@@ -241,6 +267,11 @@ const changetheme = () => {
     .login{
         position: relative;
         top:15%;
+        // padding-left: 15%;
+        // padding-right: 15%;
+        // padding-top: 15%;
+        // padding-bottom: 15%;
+        // margin-left: 10%;
         height: 70%;
         width: 70%;
         left: 10%;
@@ -300,6 +331,12 @@ const changetheme = () => {
               opacity: 0.7;
             }
         }
+        .el-form{
+          position: relative;
+          padding-left: 8%;
+          padding-right: 8%;
+          // animate__flipInX
+        }
         .flexbottom {
           display: flex;
           width: 100%;
@@ -313,7 +350,9 @@ const changetheme = () => {
         }
         .input {
             position: relative;
+            overflow: hidden;
             opacity: 0.5;
+            border-radius: 15px;
         }
         .item1 {
           color: #AF5F48;

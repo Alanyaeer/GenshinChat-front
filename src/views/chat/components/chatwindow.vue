@@ -169,6 +169,7 @@ const sendFile = (e) => {
       default:
         chatFile.extend.fileType = 0;
     }
+    console.log(chatFile);
     sendMsg(chatFile);
     e.target.files = null;
   }
@@ -240,9 +241,9 @@ watch(
     </div>
     <div class="botoom">
       <div class="chat-content" ref="chatContent">
-        <div class="chat-wrapper" v-for="item in chatList" :key="item.id">
+        <div class="chat-wrapper " v-for="item in chatList" :key="item.id">
           <div class="chat-friend" v-if="item.uid !== '1001'">
-            <div class="chat-text" v-if="item.chatType == 0">
+            <div class="chat-text " v-if="item.chatType == 0">
               {{ item.msg }}
             </div>
             <div class="chat-img" v-if="item.chatType == 1" >
@@ -270,11 +271,13 @@ watch(
               <span>{{ item.time }}</span>
             </div>
           </div>
-          <div class="chat-me" v-else>
-            <div class="chat-text" v-if="item.chatType == 0">
+          <!-- animate__slideInUp -->
+          <!-- animate__bounceIn -->
+          <div class="chat-me " v-else>
+            <div class="chat-text animate__animated animate__slideInUp" v-if="item.chatType == 0">
               {{ item.msg }}
             </div>
-            <div class="chat-img" v-if="item.chatType == 1">
+            <div class="chat-img animate__animated animate__slideInUp" v-if="item.chatType == 1">
               <img
                 :src="item.msg"
                 alt="表情"
@@ -289,7 +292,7 @@ watch(
               >
               </el-image>
             </div>
-            <div class="chat-img" v-if="item.chatType == 2">
+            <div class="chat-img animate__animated animate__slideInUp" v-if="item.chatType == 2">
               <div class="word-file">
                 <FileCard
                   :fileType="item.extend.fileType"
@@ -297,7 +300,7 @@ watch(
                 ></FileCard>
               </div>
             </div>
-            <div class="info-time">
+            <div class="info-time ">
               <span>{{ item.name }}</span>
               <span>{{ item.time }}</span>
               <img :src="item.headImg" alt="" />
@@ -309,6 +312,7 @@ watch(
         <div class="emoji boxinput" @click="clickEmoji">
           <img src="@/assets/img/emoji/smiling-face.png" alt="" />
         </div>
+        <!-- 表情包部分 -->
         <div class="emoji-content">
           <Emoji
             v-show="showEmoji"
@@ -453,6 +457,7 @@ watch(
           flex-direction: column;
           justify-content: flex-end;
           align-items: flex-end;
+          // transition: all ease-in 0.3s;
           .chat-text {
             float: right;
             max-width: 90%;
@@ -522,9 +527,11 @@ watch(
       }
       .emoji {
         transition: 0.3s;
+        box-shadow:  0px 0px 4px 1px rgb(34, 135, 225);
         &:hover {
           background-color: rgb(46, 49, 61);
           border: 1px solid rgb(71, 73, 82);
+          box-shadow: inset 0px 0px 4px 1px rgb(34, 135, 225);
         }
       }
 
@@ -534,6 +541,9 @@ watch(
         background-color: rgb(66, 70, 86);
         border-radius: 15px;
         border: 2px solid rgb(34, 135, 225);
+        // box-shadow: 0;
+        // box-shadow: 0px 0px 12px 1px rgb(34, 135, 225);
+        box-shadow: inset 0px 0px 4px 1px rgb(34, 135, 225);
         padding: 10px;
         box-sizing: border-box;
         transition: 0.2s;

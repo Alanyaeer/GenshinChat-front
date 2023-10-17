@@ -1,114 +1,35 @@
 <script setup>
-
+import {ref } from 'vue'
 import {
-  Document,
-  Menu as IconMenu,
-  Location,
-  Setting,
+    Sunrise
 } from '@element-plus/icons-vue'
-import { getCurrentInstance } from 'vue';
+// import { ManagePage} from './manage/ManagePage.vue'
+import ManagePage from './manage/ManagePage.vue'
 </script>
 <template>
-  <el-radio-group v-model="size">
-    <el-radio label="large">Large</el-radio>
-    <el-radio>Default</el-radio>
-    <el-radio label="small">Small</el-radio>
-  </el-radio-group>
-
-  <el-descriptions
-    class="margin-top"
-    title="With border"
-    :column="3"
-    :size="size"
-    border
-  >
-    <template #extra>
-      <el-button type="primary">Operation</el-button>
-    </template>
-    <el-descriptions-item>
-      <template #label>
-        <div class="cell-item">
-          <el-icon :style="iconStyle">
-            <user />
-          </el-icon>
-          Username
+    <div class="bg">
+        <div class="userinfo">
+            <ManagePage></ManagePage>
+            <ei-icon><Sunrise/></ei-icon>
         </div>
-      </template>
-      kooriookami
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template #label>
-        <div class="cell-item">
-          <el-icon :style="iconStyle">
-            <iphone />
-          </el-icon>
-          Telephone
-        </div>
-      </template>
-      18100000000
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template #label>
-        <div class="cell-item">
-          <el-icon :style="iconStyle">
-            <location />
-          </el-icon>
-          Place
-        </div>
-      </template>
-      Suzhou
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template #label>
-        <div class="cell-item">
-          <el-icon :style="iconStyle">
-            <tickets />
-          </el-icon>
-          Remarks
-        </div>
-      </template>
-      <el-tag size="small">School</el-tag>
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template #label>
-        <div class="cell-item">
-          <el-icon :style="iconStyle">
-            <office-building />
-          </el-icon>
-          Address
-        </div>
-      </template>
-      No.1188, Wuzhong Avenue, Wuzhong District, Suzhou, Jiangsu Province
-    </el-descriptions-item>
-  </el-descriptions>
-
-  <el-descriptions
-    class="margin-top"
-    title="Without border"
-    :column="3"
-    :size="size"
-    :style="blockMargin"
-  >
-    <template #extra>
-      <el-button type="primary">Operation</el-button>
-    </template>
-    <el-descriptions-item label="Username">kooriookami</el-descriptions-item>
-    <el-descriptions-item label="Telephone">18100000000</el-descriptions-item>
-    <el-descriptions-item label="Place">Suzhou</el-descriptions-item>
-    <el-descriptions-item label="Remarks">
-      <el-tag size="small">School</el-tag>
-    </el-descriptions-item>
-    <el-descriptions-item label="Address"
-      >No.1188, Wuzhong Avenue, Wuzhong District, Suzhou, Jiangsu Province
-    </el-descriptions-item>
-  </el-descriptions>
+    </div>
 </template>
 
 <style>
-.bg {
-    color : blue;
-}
-.bg:hover {
-    color :red;
-}
+    .bg{
+        /* background-color: rgb(215, 175, 175); */
+        background-color: rgb(65, 70, 70);
+        height: 100vh;
+        width : 100vw;
+        .userinfo{
+            position: absolute;
+            /* left: 50%;
+            top: 50%;
+            width: 5%;
+            height: 5%; */
+            /* transform:  translate(-50%,-50%); */
+        }
+    }
+
 </style>
+
