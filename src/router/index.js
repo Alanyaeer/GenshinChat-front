@@ -31,6 +31,10 @@ const router = createRouter({
     {
       path: '/emoji',
       component: ()=> import('@/components/Emoji.vue')
+    },
+    {
+      path: '/dialog',
+      component: ()=> import('@/components/Dialog.vue')
     }
   ]
 })
@@ -41,8 +45,7 @@ router.beforeEach((to, from, next) =>{
   else{
     next()
   }
-  // const useStore = useUserStore()
-
-  // if(useStore.token === '' && to.path !== '/login')return '/login'
+  const useStore = useUserStore()
+  if(useStore.token === '' && to.path !== '/login')return '/login'
 })
 export default router

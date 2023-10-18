@@ -17,18 +17,31 @@ import {
   CloseBold 
 } from '@element-plus/icons-vue'
 import HeadCard from '@/components/HeadCard.vue'
+import Dialog from '@/components/Dialog.vue'
 // import HeadCard from "../components/HeadCard.vue";
 import { ref , watch, onMounted, defineProps, defineExpose, defineEmits} from 'vue'
 import {getFriend} from '@/api/getData.js'
-import { ElMessage } from 'element-plus';
+import PersonCart from '@/components/PersonCart.vue'
+import { useRoute } from 'vue-router';
+// import {useUser}
+import {useUserStore} from '@/stores'
+import { deletefriend , addfriend} from '../../api/apiuser'
+import PersonTalk from '@/components/PersonTalk.vue'
+import { checkboxGroupEmits } from 'element-plus'
 const props = defineProps({
   come: {
     type: Number,
     default: 1
   }
 })
-const emits = defineEmits(['closeDialog'])
 
+const emits = defineEmits(['closeDialog', 'clickPersonorigin'])
+
+const userinnername = ref('')
+const showDialog = ref(false)
+const info = ref('')
+const personInfo = ref('')
+const pcCurrent = ref('')
 const before = ref('1')
 const switchvalue = ref(false)
 const nowvalue = ref('')
@@ -38,22 +51,35 @@ const username = ref('')
 const userdetail = ref('')
 const userimg = ref('')
 const searchvalue = ref('')
-const personlist = ref('')
+const personlist = ref([])
 const showhead = ref('')
 const textshow = ref('确认')
+const userStore = useUserStore()
+const userimmg = ref('')
 const firstin = (id)=>{
+
   setTimeout(()=>{
     before.id = id
     change(id)
   }, 300)
 }
 // tab交换时刻
-const change = (id)=>{
-  nowvalue.value = id
+const emptyuser = ()=>{
+  userimg.value = 'src/assets/img/genshinchat.png'  
   username.value = ''
   userdetail.value = ''
   userid.value = ''
-  userimg.value = 'src/assets/img/head_portrait.jpg'
+}
+const change = (id)=>{
+  if(id === 1){
+    getuserInfo()
+  }
+  else{
+    emptyuser()
+  }
+  nowvalue.value = id
+
+  if(userimg.value.trim() === '')
 
   console.log(nowvalue.value);
   let underline = document.getElementsByClassName('underline')[0].style
@@ -118,6 +144,12 @@ const firstins = (id) => {
 const close = () => {
   emits('closeDialog')
 }
+const clickPerson = (info) => {
+    pcCurrent.value = info.id
+    userinnername.value = info.name
+    showDialog.value = true  
+    // personInfo.value = info
+}
 const searchfriend = async ()=>{
   // if(i)
   console.log(searchvalue.value);
@@ -127,7 +159,12 @@ const searchfriend = async ()=>{
   else{
     // new URL("@/assets/img/head_portrait7.jpg", import.meta.url).href
     // 获取到数据填入到里面 
-    personlist.value = await getFriend()
+    const user = await userStore.getUser()
+    let useridsss = {
+      id: user.userid
+    }
+    personlist.value = await getFriend(useridsss)
+    // console.log(personlist.value);
     let isfind = false
     // console.log(object);
     for(let i = 0; i < personlist.value.length; ++i){
@@ -136,11 +173,6 @@ const searchfriend = async ()=>{
         userdetail.value = personlist.value[i].detail
         userid.value = personlist.value[i].id
         userimg.value = personlist.value[i].headImg
-        // const url =  userimg.value
-        // const path = url.split('/').slice(-4).join('/');
-        // userimg.value = path
-
-        // console.log(userimg);
         isfind = true
       }
 
@@ -153,7 +185,7 @@ const searchfriend = async ()=>{
       username.value = ''
       userdetail.value = ''
       userid.value = ''
-      userimg.value = 'src/assets/img/head_portrait.jpg'
+      userimg.value = 'src/assets/img/genshinchat.png'  
     }
   }
   searchvalue.value = ''
@@ -167,9 +199,75 @@ const changehead = (img) => {
   showhead.value = false
 
 }
-const save = ()=>{
-  ElMessage.success('保存成功')
+const save = async ()=>{
+  // ElMessage.success('保存成功')
+  let params = {
+    username: username.value,
+    userid: userid.value,
+    userdetail: userdetail.value,
+    userimg: userimg.value,
+    userimmg: userimmg.value
+  }
+  // console.log(params);
+  if(nowvalue.value === 1){
+    userStore.setUser(params)
+
+  }
+  // if()
+  else if(nowvalue.value === 2){
+    let ids = {
+      id: searchvalue.value
+    }
+    await addfriend(ids)
+  }
+  else if(nowvalue.value === 4){
+
+  }
+  ElMessage.success('成功')
 }
+const getuserInfo = async ()=>{
+ 
+  const user =  await userStore.getUser()
+  // console.log(user.value);
+  // console.log(user);
+  userid.value = user.userid
+  username.value = user.username
+  userdetail.value = user.userdetail
+  userimg.value = user.userimg
+
+}
+const closeinner = async (id)=>{
+  showDialog.value = false
+  
+  if(id === 1){
+    const ids = {
+      id : id
+    }
+    if(nowvalue.value === 3){
+      for(let i = 0; i < personlist.value.length; i++){
+        if(personlist.value[i].id === pcCurrent.value){
+          personlist.value.splice(i,1)
+        }
+      }
+      await deletefriend(ids)
+
+      ElMessage.success('删除成功')
+    }
+    else{
+      close()
+      
+      let info = {}
+      for(let i = 0; i < personlist.value.length; ++i){
+        if(personlist.value[i].id === pcCurrent.value){
+          info = personlist.value[i]
+        }
+      }
+      emits('clickPersonorigin', info)
+    }
+
+  }
+}
+
 // 刚刚进来的时候调用一下这里 ,可以用暴露出去的方法来实现
 watch(
   // ()=>props.isshow
@@ -178,21 +276,23 @@ watch(
   {deep: true}
 
 )
-// watch(
-//   // ()=>dialog
-//   ()=> props.come,
-//   ()=>firstins,
-//   {deep: true, immediate: true}
-// )
-onMounted(()=>{
-  console.log('hello world');
 
+onMounted(async ()=>{
+  const user = await userStore.getUser()
+  let useridsss = {
+    id: user.userid
+  }
+  personlist.value = await getFriend(useridsss)
   const id = props.come
-  textshow.value =
+  if(id !== 1)emptyuser()
+  else {
+    getuserInfo()
+    console.log(userid.value)
+  }
+  textshow.value = 0
   nowvalue.value = id
-  console.log(id);
   textshowfuntion(id)
-  userimg.value = 'src/assets/img/head_portrait.jpg'
+  // userimg.value = 'src/assets/img/head_portrait.jpg'
   let underline = document.getElementsByClassName('underline')[0].style
   underline.left = (id - 1) * 19.2 + "%"
 })
@@ -202,6 +302,12 @@ onMounted(()=>{
 
 <template>
     <div class="background">
+      <Dialog 
+        v-if="showDialog"
+        :nowvalue = "nowvalue"
+        :userinnername="userinnername"
+        @closeinner="closeinner"
+      ></Dialog>
         <div class="content">
           <div class="header"> 
               <el-switch 
@@ -210,13 +316,12 @@ onMounted(()=>{
               class="switch-button"
               :active-action-icon="Sunrise"
               :inactive-action-icon="MoonNight"
-
             />
             <el-icon class="iconstyle" :size="30" @click="close" > <Minus/> </el-icon>
 
           </div>
           <div class="bottom">
-            <div class="bottom-up">
+            <div  v-if="nowvalue === 1 || nowvalue === 2" class="bottom-up">
               <div class="avatar">
                 <!-- <img/ > -->
                 <img style="border-radius: 15px;" :src="userimg" />
@@ -235,11 +340,48 @@ onMounted(()=>{
                   
                   </el-button>
               </div>
+
             </div>
+            <div v-if="nowvalue===3" class="bottom-up">
+              <div  class="online-person">
+                <div class="person-cards-wrapper">
+                <div
+                    v-for="personInfo in personlist"
+                    :key="personInfo.id"
+
+                    @click="clickPerson(personInfo)"
+                    
+                >
+                    <PersonCart
+                    :personInfo="personInfo"
+                    :pcCurrent="pcCurrent"
+                    ></PersonCart>
+                </div>
+                </div>
+              </div>
+            </div>
+             <!-- 默认情况下为最后一次聊天记录 -->
+            <div v-if="nowvalue===4" class="bottom-up">
+              <div  class="online-person1">
+                <div class="person-cards-wrapper1">
+                <div
+                    v-for="personInfo in personlist"
+                    :key="personInfo.id"
+                    @click="clickPerson(personInfo)"
+                    
+                >
+                    <PersonTalk
+                    :personInfo="personInfo"
+                    :pcCurrent="pcCurrent"
+                    ></PersonTalk>
+                </div>
+                </div>
+              </div>
+            </div>  
             <div  class="bottom-down">
             <Transition>
               <div v-if="nowvalue !== 1" class="search-box">
-                  <input class="search-txt" type="text" v-model="searchvalue" placeholder="请输入userid" />
+                  <input class="search-txt" type="text" v-model="searchvalue" placeholder="请输入userid 或者 聊天记录" />
                   <a class="search-btn">
                       <i class="fas fa-search"><el-icon @click="searchfriend" :size="20"><Search /></el-icon></i>
                   </a>
@@ -332,8 +474,11 @@ onMounted(()=>{
           --el-switch-on-color: #323644;
           --el-switch-off-color: #4c5e5f;
           --el-switch-size: 50px;
+          /* 改变默认为白色的圆形 */
+          
       }
 
+      /* 改变默认为白色的圆形 */
     }
     .bottom{
         position: relative;
@@ -453,6 +598,204 @@ onMounted(()=>{
                 box-shadow: 0px 1px 0px 0px #2f3640;
             }
           }
+          online-person {
+            margin-top: 50px;
+            margin-left:25px;
+            .onlin-text {
+                padding-right: 50px;
+                color: rgb(176, 178, 189);
+            }
+            .person-cards-wrapper {
+                height: 65vh;
+                margin-top: 20px;
+                overflow: hidden;
+                overflow-y: scroll;
+                box-sizing: border-box;
+                z-index: 100001;
+                // transition: all 1s;
+                &::-webkit-scrollbar {
+                    width: 0; /* Safari,Chrome 隐藏滚动条 */
+                    height: 0; /* Safari,Chrome 隐藏滚动条 */
+                    display: none; /* 移动端、pad 上Safari，Chrome，隐藏滚动条 */
+                }
+                .person-card {
+                    width: 250px;
+                    height: 80px;
+                    border-radius: 10px;
+                    background-color: rgb(50, 54, 68);
+                    position: relative;
+                    margin: 25px 0;
+                    cursor: pointer;
+                    font-size: 20px;
+                    &:hover {
+                        background-color: #1d90f5;
+                        transition: 0.3s;
+                        box-shadow: 0px 0px 10px 0px rgba(0, 136, 255);
+                        // box-shadow:  0 5px 20px rgba(251, 152, 11, .5);
+                        .info {
+                        .info-detail {
+                            .detail {
+                            color: #fff;
+                            }
+                        }
+                        }
+                    }
+                    position: relative;
+                    .iconcolor {
+                        left: 42%;
+                        top :26%;
+                        color:whitesmoke
+                    }
+                }
+              .activeCard {
+                  background-color: #1d90f5;
+                  transition: 0.3s;
+                  box-shadow: 3px 2px 10px 0px rgba(0, 136, 255);
+                  .info {
+                  .info-detail {
+                      .detail {
+                      color: #fff;
+                      }
+                  }
+                  }
+              }
+            }
+        }
+        // 朋友卡片css
+        .online-person {
+          position: relative;
+            // margin-top: 5%;
+            // margin-left:27%;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            .onlin-text {
+                padding-right: 50px;
+                color: rgb(176, 178, 189);
+            }
+            .person-cards-wrapper {
+              position: relative;
+                height: 90%;
+                margin-top: 20px;
+                overflow: hidden;
+                overflow-y: scroll;
+                box-sizing: border-box;
+                // transition: all 1s;
+                &::-webkit-scrollbar {
+                    width: 0; /* Safari,Chrome 隐藏滚动条 */
+                    height: 0; /* Safari,Chrome 隐藏滚动条 */
+                    display: none; /* 移动端、pad 上Safari，Chrome，隐藏滚动条 */
+                }
+                .person-card {
+                    width: 250px;
+                    height: 80px;
+                    border-radius: 10px;
+                    background-color: rgb(50, 54, 68);
+                    position: relative;
+                    margin: 25px 0;
+                    cursor: pointer;
+                    font-size: 20px;
+                    &:hover {
+                        background-color: #f24c4c;
+                        transition: 0.3s;
+                        box-shadow: 0px 0px 10px 0px rgb(227, 75, 37);
+                        // box-shadow:  0 5px 20px rgba(251, 152, 11, .5);
+                        .info {
+                        .info-detail {
+                            .detail {
+                            color: #fff;
+                            }
+                        }
+                        }
+                    }
+                    position: relative;
+                    .iconcolor {
+                        left: 42%;
+                        top :26%;
+                        color:whitesmoke
+                    }
+                }
+                    .activeCard {
+                        background-color: #f24c4c;
+                        transition: 0.3s;
+                        box-shadow: 3px 2px 10px 0px #f24c4c;
+                        .info {
+                        .info-detail {
+                            .detail {
+                            color: #fff;
+                            }
+                        }
+                        }
+                    }
+            }
+        }
+        .online-person1 {
+          position: relative;
+            // margin-top: 5%;
+            // margin-left:27%;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            .onlin-text {
+                padding-right: 50px;
+                color: rgb(176, 178, 189);
+            }
+            .person-cards-wrapper1 {
+              position: relative;
+                height: 90%;
+                margin-top: 20px;
+                overflow: hidden;
+                overflow-y: scroll;
+                box-sizing: border-box;
+                // transition: all 1s;
+                &::-webkit-scrollbar {
+                    width: 0; /* Safari,Chrome 隐藏滚动条 */
+                    height: 0; /* Safari,Chrome 隐藏滚动条 */
+                    display: none; /* 移动端、pad 上Safari，Chrome，隐藏滚动条 */
+                }
+                .person-card1 {
+                    width: 300px;
+                    height: 80px;
+                    border-radius: 10px;
+                    background-color: rgb(50, 54, 68);
+                    position: relative;
+                    margin: 25px 0;
+                    cursor: pointer;
+                    font-size: 20px;
+                    &:hover {
+                        background-color: #f24c4c;
+                        transition: 0.3s;
+                        box-shadow: 0px 0px 10px 0px rgb(227, 75, 37);
+                        // box-shadow:  0 5px 20px rgba(251, 152, 11, .5);
+                        .info {
+                        .info-detail {
+                            .detail {
+                            color: #fff;
+                            }
+                        }
+                        }
+                    }
+                    position: relative;
+                    .iconcolor {
+                        left: 42%;
+                        top :26%;
+                        color:whitesmoke
+                    }
+                }
+                    .activeCard {
+                        background-color: #f24c4c;
+                        transition: 0.3s;
+                        box-shadow: 3px 2px 10px 0px #f24c4c;
+                        .info {
+                        .info-detail {
+                            .detail {
+                            color: #fff;
+                            }
+                        }
+                        }
+                    }
+            }
+        }
         }
         .v-enter-active,
         .v-leave-active {
@@ -470,6 +813,7 @@ onMounted(()=>{
           position: relative;
           background-color: #757889;
           width: 100%;
+          // transition: 1s 1.2s;
           height: 20%;
           border-radius: 10px;
           .search-box {

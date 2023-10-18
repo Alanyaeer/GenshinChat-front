@@ -9,7 +9,7 @@ export const getFriend = params => {
       baseURL: `${baseUrl}/friend/friendList`,
       data: params
     }).then(res => res.data)
-  }
+}
 
   // 获取聊天信息
 export const getChatMsg = params => {

@@ -41,8 +41,6 @@ const emojiList =  ref([
     new URL("@/assets/img/head_portrait39.jpg", import.meta.url).href,
     new URL("@/assets/img/head_portrait40.jpg", import.meta.url).href,
     new URL("@/assets/img/head_portrait41.jpg", import.meta.url).href,
-    new URL("@/assets/img/head_portrait42.jpg", import.meta.url).href,
-    new URL("@/assets/img/head_portrait43.jpg", import.meta.url).href,
 ])
 const sendheads = (item) => {
     emit('sendhead', item)

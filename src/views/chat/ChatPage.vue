@@ -11,7 +11,8 @@ import {
   FullScreen,
   CloseBold, 
   User, 
-    Delete
+  Delete,
+  Plus 
 } from '@element-plus/icons-vue'
 
 // import { QuillEditor } from '@vueup/vue-quill'
@@ -22,8 +23,7 @@ import { useRouter } from 'vue-router'
 import { getFriend } from '@/api/getData'
 import  PersonCart  from '@/components/PersonCart.vue'
 import chatwindow from './components/chatwindow.vue'
-import { Plus } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { useUserStore } from  '@/stores'
 import ManagePage from '../manage/ManagePage.vue'
 const router = useRouter()
 // import { router } from 'vue-router';
@@ -42,16 +42,17 @@ const chatWindowInfo = ref('')
 const isshowDialog = ref(false)
 const userInfo = ref('')
 const typeDialog = ref(1)
+const userStore = useUserStore()
 // 判断消息的来源
 const direction = ref(false)
-avatarUrl.value = avatar
+
 // avatarUrl.value = require.resolve('@/assets/images/avatar_default.png')
 
 const logout = () => {
+    userStore.removeId()
     router.push('/login')
 }
 const clickPerson = (info) => {
-    
     pcCurrent.value = info.id
     isShowChatWindow.value = true
     personInfo.value = info
@@ -121,20 +122,19 @@ const manage = (id) => {
     isshowDialog.value = true
 }
 onMounted(async () => {
-    personList.value = await getFriend ()
+    const user = await userStore.getUser()
+    let id = {
+        id: user.userid
+    }
+    personList.value = await getFriend (id)
+    avatarUrl.value = user.userimg
 })
-// watch(
-//   () => isshowDialog,
-//   () => {
-//     DialogEvent()
-//   }
-// )
 </script>
 
 <template>
         <!-- zoomIn -->
         <Transition>
-            <ManagePage v-if="isshowDialog" @closeDialog="closeDialog" :come = "typeDialog" ></ManagePage>
+            <ManagePage v-if="isshowDialog" @closeDialog="closeDialog" @clickPersonorigin="clickPerson" :come = "typeDialog" ></ManagePage>
         </Transition>
         
 
@@ -144,7 +144,6 @@ onMounted(async () => {
                 class="mr-3"
                 :size="45"
                 :src="avatarUrl"
-               
             />
         </div>
         <div class="search-box">
@@ -187,7 +186,7 @@ onMounted(async () => {
 
 
         <el-col :span="middlesize" class="middlecomponent"> 
-            <h1 class="title">WeChat</h1>
+            <h1 class="title">GenshinChat</h1>
             <div class="online-person">
                 <span class="onlin-text">聊天列表</span>
                 <span  style="padding-left: 100px; color: rgb(176, 178, 189)">{{ personList.length}} / ?</span>
@@ -236,7 +235,7 @@ onMounted(async () => {
                     <div v-else>
                         <span class="emptychaticon">
                             <!-- TODO -->
-                            <img class="iconsize" src="@/assets/snapchat.png" alt="" />
+                            <img class="iconsize" src="@/assets/img/genshinchat.png" alt="" />
                         </span>
                     </div>
                 </div>

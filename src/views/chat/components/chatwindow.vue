@@ -26,11 +26,11 @@ const props = defineProps({
 const emit = defineEmits(['personCardSort'])
 // methods
 // 获取聊天记录
-const getFriendChatMsg = () => {
+const getFriendChatMsg = async () => {
   let params = {
     frinedId: props.friendInfo.id,
   };
-  getChatMsg(params).then((res) => {
+  await getChatMsg(params).then((res) => {
     chatList.value = res;
     chatList.value.forEach((item) => {
       if (item.chatType == 2 && item.extend.imgType == 2) {
@@ -182,7 +182,7 @@ const telephone = () => {
 const video = () => {
   ElMessage.info("视频功能开发中")
 }
-// Mounted时期
+// Mounted时期, 此处还需要进一步封装
 onMounted(()=>{
 
   getFriendChatMsg()

@@ -1,17 +1,46 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { getuserInfo ,saveuserInfo} from '../../api/apiuser'
 export const useUserStore = defineStore(
   'chat-user',
   () => {
-    const token = ref('')
-    const username = ref('')
-    const userimg = ref('')
     const userid = ref('')
-    const userdetail = ref('')
+    // const Jwt = ref('')
+    let userInfo = {
+      userid: '',
+      username: '',
+      userimmg: '',
+      userimg: '',
+      userdetail: '',
+    }
+    const setId = (newToken)=>{
+      userid.value = newToken
+    }
+    const removeId = ()=>{
+      userid.value = ''
+    }
+    const getUser = async () => {
+      let params = {
+        id: userid.value
+      }
+      // await 
+      await getuserInfo(params).then((res)=>{
+        userInfo = res
+      })
+      console.log(userInfo);
 
-
+      return userInfo
+    }
+    const setUser = async (obj)=>{
+      userInfo = obj
+      await saveuserInfo(userInfo).then((res)=>{
+        console.log(res);
+      })
+      getUser()
+    }
+    // const 
     return {
-        token, username, userimg, userid
+        userid,getUser, setUser,userInfo,setId, removeId
     }
   },
   {

@@ -1,8 +1,14 @@
 // const Mock = new URL("mockjs", import.meta.url).href;
+
 import Mock from 'mockjs'
 
-Mock.mock(/friend\/friendList/, 'post', () => { //三个参数。第一个：路径，第二个：请求方式post/get，第三个：回调，返回值
-    return friendList
+Mock.mock(/friend\/friendList/, 'post', (id) => { //三个参数。第一个：路径，第二个：请求方式post/get，第三个：回调，返回值
+    let ids = JSON.parse(id.body)
+    if(ids.id == "1002"){
+    console.log('here');
+
+        return friendList
+    }
 })
 
 Mock.mock(/friend\/chatMsg/, 'post', (config) => { //三个参数。第一个：路径，第二个：请求方式post/get，第三个：回调，返回值
@@ -15,7 +21,102 @@ Mock.mock(/friend\/chatMsg/, 'post', (config) => { //三个参数。第一个：
         return chatMsg1004
 })
 
+Mock.mock(/api\/login/, 'post', (objs)=>{
+    let obj = JSON.parse(objs.body)
+    if(obj.id === "1002" && obj.password === "123456"){
+        return apiuser1
+    }
+    if(obj.id === "1003" && obj.password === "12345af6"){
+        return apiuser2
+    }
+    if(obj.id === "1004" && obj.password === "1234afa56"){
+        return apiuser3
+    }
+})
+Mock.mock(/api\/register/, 'post', (objs)=>{
+    let obj = JSON.parse(objs.body)
+    if(obj.id === "1002" ){
+        return apiregisteruser1
+    }
+    if(obj.id === "1003" ){
+        return apiregisteruser2
+    }
+    if(obj.id === "1004" ){
+        return apiregisteruser3
+    }
+})
+let apiregisteruser1 = Mock.mock(
+    {
+        code: "1"
+    }
+)
+let apiregisteruser2 = Mock.mock(
+    {
+        code: "1"
+    }
+)
+let apiregisteruser3 = Mock.mock(
+    {
+        code: "0"
+    }
+)
+Mock.mock(/api\/getuserInfo/, 'post', (objs) => {
+    let obj = JSON.parse(objs.body)
+    if(obj.id === '1002'){
+        return apiuserInfo1
+    }
+    if(obj.id === '1003'){
+        return apiuserInfo2
+    }
+    if(obj.id === '1004'){
+        return apiuserInfo3
+    }
+})
+let apiuserInfo1 = Mock.mock(
+    {
+        // data: {
+        userid: '1002',
+        username: '大毛',
+        userimmg: '',
+        userimg: new URL("@/assets/img/head_portrait4.jpg", import.meta.url).href,
+        userdetail: '我是大毛'
+        
+        // }
+    }
+)
+let apiuserInfo2 = Mock.mock(
+    {
+        // data: {
+        userid: '1003',
+        username: '小毛',
+        userimmg: '',
+        userimg: new URL("@/assets/img/head_portrait5.jpg", import.meta.url).href,
+        userdetail: '我是小毛'
 
+        // }
+    }
+)
+let apiuserInfo3 = Mock.mock(
+    {
+        // data: {
+            userid: '1003',
+            username: '小王',
+            userimmg: '',
+            userimg: new URL("@/assets/img/head_portrait6.jpg", import.meta.url).href,
+            userdetail: '我是小王'
+
+        // }
+    }
+)
+let apiuser1 = Mock.mock(
+    "1"
+)
+let apiuser2 = Mock.mock(
+    "1"
+)
+let apiuser3 = Mock.mock(
+    "0"
+)
 let friendList = Mock.mock(
     [
         {

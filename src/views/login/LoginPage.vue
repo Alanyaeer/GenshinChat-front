@@ -5,24 +5,26 @@ import 'animate.css';
 import {
   User, Lock, ArrowRightBold, ArrowLeftBold, PictureFilled
 } from '@element-plus/icons-vue'
-
-
+import {registeruser, loginuser} from '@/api/apiuser'
+import { useRouter } from 'vue-router';
+import {useUserStore} from '@/stores'
 const formModel = ref({
-  username: '',
+  id: '',
   password: '',
   repassword: ''
 })
 const isRegister = ref(true)
 const themevalue = ref(0)
 const switchvalue = ref(0);
-
-
+const form = ref()
+const router = useRouter()
+const userStore = useUserStore()
 //整个表单的校验规则    
 const rules = {
   // blur 代表的是， 失去焦点的时候才去校验
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 5, max: 10, message: '用户名长度在5-10个字符之间', trigger: 'blur' }
+  id: [
+    { required: true, message: '请输入id', trigger: 'blur' },
+    { min: 4, max: 10, message: 'id长度在4-10个字符之间', trigger: 'blur' }
   ],
   password: [
     {
@@ -32,8 +34,8 @@ const rules = {
     },
     {
       // 这里 /^ 代表开头， $/代表结尾 , \S表示非空字符
-      pattern: /^\S{6,15}$/,
-      message: '密码必须为6-16非空字符',
+      pattern: /^\S{4,16}$/,
+      message: '密码必须为4-16非空字符',
       trigger: 'blur'
     }
   ],
@@ -99,7 +101,7 @@ const changetheme = () => {
     const todo2 = document.getElementsByClassName('button')[0].style
     const todo3 = document.getElementsByClassName('three-d')[0].style
     // 其他时刻状态
-    todo.background = "url('src/assets/login_bg3.jpg') no-repeat center / cover"
+    todo.background = "url('src/assets/login_bg5.png') no-repeat center / cover"
     todo1.color = "rgb(233,240,191)"
     todo2.background = "rgb(43,66,30)"
     console.log(todo3)
@@ -117,6 +119,33 @@ const changetheme = () => {
   }, 1000)
   
 
+}
+const register = async () => {
+  await form.value.validate()
+
+  const {code} = await registeruser(formModel.value)
+  console.log(code);
+
+  if(code === '1'){
+    ElMessage.success('注册成功')
+    isRegister.value = false
+  }
+  else ElMessage.error('注册失败')
+}
+const login = async()=>{
+  await form.value.validate()
+  const code = await loginuser(formModel.value)
+  // console.log(formModel.value);
+
+  // console.log(code);
+  if(code === '1'){
+    ElMessage.success('登录成功')
+    userStore.userid = formModel.value.id
+    router.push('chat')
+  }
+  else{
+    ElMessage.error('登录失败')
+  }
 }
 </script>
 <template>
@@ -137,12 +166,12 @@ const changetheme = () => {
                         <h1 class="title1">注册</h1>
                     </el-form-item>
                     <!-- 登录相关表单 -->
-                    <el-form-item prop="username">
+                    <el-form-item prop="id">
                         <el-input
                         class="input"
-                        v-model="formModel.username"
+                        v-model="formModel.id"
                         :prefix-icon="User"
-                        placeholder="请输入用户名"
+                        placeholder="请输入id"
                         ></el-input>
                     </el-form-item>
                     <el-form-item prop="password">
@@ -206,8 +235,8 @@ const changetheme = () => {
                           Wechat
                         </h1>
                     </el-form-item>
-                    <el-form-item prop="username">
-                        <el-input class="input" v-model="formModel.username" :prefix-icon="User" placeholder="请输入用户名"></el-input>
+                    <el-form-item prop="id">
+                        <el-input class="input" v-model="formModel.id" :prefix-icon="User" placeholder="请输入id"></el-input>
                     </el-form-item>
                     <el-form-item prop="password">
                         <el-input 
