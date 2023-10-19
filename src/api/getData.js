@@ -11,7 +11,7 @@ export const getFriend = params => {
     }).then(res => res.data)
 }
 
-  // 获取聊天信息
+  // 获取聊天信息, 这里可以拓展方法比如 msg，time, friendId
 export const getChatMsg = params => {
   return axios({
     method: 'post',

@@ -43,6 +43,7 @@ const isshowDialog = ref(false)
 const userInfo = ref('')
 const typeDialog = ref(1)
 const userStore = useUserStore()
+const onperson = ref(0)
 // 判断消息的来源
 const direction = ref(false)
 
@@ -59,6 +60,11 @@ const clickPerson = (info) => {
     personCardSort(info.id)
     // console.log(personInfo.value);
     chatWindowInfo.value = info
+    // 
+    // 滚条属性存在的话 
+    if(info.pos){
+        // 移动到对应的位置
+    }   
 }
 const Fullexpend = () => {
     ismoving.value = true
@@ -99,20 +105,6 @@ const personCardSort = (id)=>{
         }
     }
 }
-// // 修改数据或者增添数据
-// const DialogEvent = () => {
-//     // type 类型
-
-//         // 第一种就是修改自己的头像
-//             // 修改头像成功
-//             ElMessage.success('修改头像成功')
-
-//         // 第二种增添好友
-//             // 调用 PersonCardSort 方法将他往上移动
-//             ElMessage.success('增添好友成功')
-//     // 发送提示
-// }
-// 点击后清空dialog
 const closeDialog = () => {
     isshowDialog.value = false
 }
@@ -122,11 +114,31 @@ const manage = (id) => {
     isshowDialog.value = true
 }
 onMounted(async () => {
+
+    var nums = 0
+
     const user = await userStore.getUser()
     let id = {
         id: user.userid
     }
-    personList.value = await getFriend (id)
+    personList.value = await getFriend(id)
+    for(let i = 0; i < personList.value.length; i++){
+            if(personList.value[i].status === true){
+                nums++
+            }
+        }
+    onperson.value = nums
+    nums = 0
+    setInterval(()=>{
+        for(let i = 0; i < personList.value.length; i++){
+            if(personList.value[i].status === true){
+                nums++
+            }
+        }
+        onperson.value = nums
+        nums = 0
+    },10000)
+
     avatarUrl.value = user.userimg
 })
 </script>
@@ -189,7 +201,7 @@ onMounted(async () => {
             <h1 class="title">GenshinChat</h1>
             <div class="online-person">
                 <span class="onlin-text">聊天列表</span>
-                <span  style="padding-left: 100px; color: rgb(176, 178, 189)">{{ personList.length}} / ?</span>
+                <span  style="padding-left: 100px; color: rgb(176, 178, 189)">{{ onperson }} / {{ personList.length}}</span>
                 <!-- <Transition> -->
                     <div class="person-cards-wrapper">
                     <div
@@ -258,6 +270,10 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
+@font-face {
+    font-family: dogica;
+    src: url(@/assets/font/dogica.ttf);
+    }
 // .changeshow-enter-active{
 //     animation: animate__zoomIn;
 //     animation-duration: 1s;
@@ -387,9 +403,13 @@ onMounted(async () => {
         padding-left: 1%;
         border-color:#232D4A;
         border-radius: 30px 0% 0% 0%;
+ 
         .title {
+
             color:#fff;
             padding-left: 10px;
+            font-size: 25px;
+            font-family: dogica;
         }
         .online-person {
             margin-top: 50px;

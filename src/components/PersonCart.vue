@@ -1,7 +1,32 @@
+
+
+<script setup>
+import HeadPortrait from "./HeadPortrait.vue";
+import {defineProps,watch, ref} from 'vue'
+const props = defineProps({
+  personInfo:{
+    default: {
+    }
+  },
+  pcCurrent: {
+    default: ''
+  }
+})
+const current = ref('')
+const isActive = () => {
+  current.value = props.pcCurrent
+}
+watch(
+  ()=> props.pcCurrent,
+  ()=> isActive(),
+  {immediate: true, deep: true}
+)
+</script>
+
 <template>
   <div class="person-card" :class="{ activeCard: personInfo.id == current }">
     <div class="info">
-          <HeadPortrait :imgUrl="personInfo.headImg"></HeadPortrait>
+          <HeadPortrait :imgUrl="personInfo.headImg" :status="personInfo.status"></HeadPortrait>
           <div class="info-detail">
             <div class="name">{{ personInfo.name }}</div>
             <div class="detail">{{ personInfo.detail }}</div>
@@ -10,41 +35,6 @@
     </div>
   </div>
 </template>
-
-<script>
-import HeadPortrait from "./HeadPortrait.vue";
-
-export default {
-  props: {
-    personInfo: {
-      default: {
-      },
-    },
-    pcCurrent: {
-      default: ''
-    }
-  },
-  components: {
-    HeadPortrait,
-  },
-  data() {
-    return {
-      current: '',
-    }
-  },
-  watch: {
-    pcCurrent: function() {
-      this.isActive()
-    }
-  },
-  methods: {
-    isActive() {
-      this.current = this.pcCurrent
-    }
-  }
-};
-</script>
-
 <style lang="scss" scoped>
 .person-card {
   width: 250px;

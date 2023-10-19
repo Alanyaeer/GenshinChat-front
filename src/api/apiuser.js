@@ -26,7 +26,7 @@ export const registeruser = ({id, password, repassword})=>{
 export const saveuserInfo = (params)=>{
     return axios({
         method: 'post',
-        baseURL: `${baseUrl}/api/register`,
+        baseURL: `${baseUrl}/api/save`,
         data: params
     }).then(res => res.data)
 }
@@ -42,5 +42,13 @@ export const addfriend = (params)=>{
         method: 'post',
         baseURL: `${baseUrl}/api/addfriend`,
         data: params
+    }).then(res => res.data)
+}
+// 搜索所有的对象
+export const searchfriends = params => {
+    return axios({
+      method: 'post',
+      baseURL: `${baseUrl}/api/searchfriends`,
+      data: params
     }).then(res => res.data)
 }

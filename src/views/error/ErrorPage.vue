@@ -33,7 +33,7 @@
 <style lang="scss" scoped>
 @font-face {
   font-family: dogica;
-  src: url(@/asset/font/dogica.ttf);
+  src: url(@/assets/font/dogica.ttf);
 }
 * {
   padding: 0;

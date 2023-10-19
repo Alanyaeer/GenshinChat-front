@@ -25,16 +25,17 @@ import PersonCart from '@/components/PersonCart.vue'
 import { useRoute } from 'vue-router';
 // import {useUser}
 import {useUserStore} from '@/stores'
-import { deletefriend , addfriend} from '../../api/apiuser'
+import { deletefriend , addfriend, saveuserInfo,searchfriends} from '../../api/apiuser'
 import PersonTalk from '@/components/PersonTalk.vue'
-import { checkboxGroupEmits } from 'element-plus'
+import { ElMessage, checkboxGroupEmits } from 'element-plus'
+import { getChatMsg } from '../../api/getData'
 const props = defineProps({
   come: {
     type: Number,
     default: 1
   }
 })
-
+const loadingv = ref(false)
 const emits = defineEmits(['closeDialog', 'clickPersonorigin'])
 
 const userinnername = ref('')
@@ -56,6 +57,8 @@ const showhead = ref('')
 const textshow = ref('确认')
 const userStore = useUserStore()
 const userimmg = ref('')
+const Messagelist = ref([])
+const msgCurrent  = ref('')
 const firstin = (id)=>{
 
   setTimeout(()=>{
@@ -145,51 +148,65 @@ const close = () => {
   emits('closeDialog')
 }
 const clickPerson = (info) => {
-    pcCurrent.value = info.id
-    userinnername.value = info.name
-    showDialog.value = true  
+    if(nowvalue.value === 3){
+      pcCurrent.value = info.id
+      userinnername.value = info.name
+    }
+    else{
+      msgCurrent.value = info.id
+    }
+    showDialog.value = true
+
     // personInfo.value = info
 }
 const searchfriend = async ()=>{
   // if(i)
-  console.log(searchvalue.value);
   if(searchvalue.value.trim == ''){
     ElMessage('请输入搜索内容')
   }
   else{
-    // new URL("@/assets/img/head_portrait7.jpg", import.meta.url).href
-    // 获取到数据填入到里面 
-    const user = await userStore.getUser()
-    let useridsss = {
-      id: user.userid
-    }
-    personlist.value = await getFriend(useridsss)
-    // console.log(personlist.value);
-    let isfind = false
-    // console.log(object);
-    for(let i = 0; i < personlist.value.length; ++i){
-      if(personlist.value[i].id === searchvalue.value){
-        username.value= personlist.value[i].name
-        userdetail.value = personlist.value[i].detail
-        userid.value = personlist.value[i].id
-        userimg.value = personlist.value[i].headImg
-        isfind = true
+    console.log(nowvalue.value);
+    if(nowvalue.value === 2){
+      const user = await userStore.getUser()
+      let useridsss = {
+        id: user.userid
       }
-
-      
-      // console.log(path)
+      personlist.value = await searchfriends(useridsss)
+      console.log(personlist.value);
+      // console.log(personlist.value);
+      let isfind = false
+      // console.log(object);
+      for(let i = 0; i < personlist.value.length; ++i){
+        if(personlist.value[i].id === searchvalue.value){
+          username.value= personlist.value[i].name
+          userdetail.value = personlist.value[i].detail
+          userid.value = personlist.value[i].id
+          userimg.value = personlist.value[i].headImg
+          isfind = true
+        }
+      }
+      if(isfind === false) {
+        ElMessage.warning('未能找到该用户')
+        username.value = ''
+        userdetail.value = ''
+        userid.value = ''
+        userimg.value = 'src/assets/img/genshinchat.png'  
+      }
+  }
+  // nowvalue为4的时候， 也就是搜索聊天记录
+  else {
+  
+    let params = {
 
     }
-    if(isfind === false) {
-      ElMessage.warning('未能找到该用户')
-      username.value = ''
-      userdetail.value = ''
-      userid.value = ''
-      userimg.value = 'src/assets/img/genshinchat.png'  
-    }
+    getChatMsg
   }
   searchvalue.value = ''
   // 检测id的类型
+  }
+    // new URL("@/assets/img/head_portrait7.jpg", import.meta.url).href
+    // 获取到数据填入到里面 
+    
 
 }
 
@@ -211,7 +228,6 @@ const save = async ()=>{
   // console.log(params);
   if(nowvalue.value === 1){
     userStore.setUser(params)
-
   }
   // if()
   else if(nowvalue.value === 2){
@@ -220,10 +236,6 @@ const save = async ()=>{
     }
     await addfriend(ids)
   }
-  else if(nowvalue.value === 4){
-
-  }
-  ElMessage.success('成功')
 }
 const getuserInfo = async ()=>{
  
@@ -254,17 +266,19 @@ const closeinner = async (id)=>{
       ElMessage.success('删除成功')
     }
     else{
+      // getChatMsg
+      //需要修改这里为MessageList
       close()
-      
       let info = {}
-      for(let i = 0; i < personlist.value.length; ++i){
-        if(personlist.value[i].id === pcCurrent.value){
-          info = personlist.value[i]
+      for(let i = 0; i < Messagelist.value.length; ++i){
+        if(Messagelist.value[i].id === msgCurrent.value){
+          info = Messagelist.value[i]
         }
       }
+      // 短信基础上在返回一个滚条位置。 
       emits('clickPersonorigin', info)
+      // 滑动到对应的数据跳中
     }
-
   }
 }
 
@@ -295,6 +309,7 @@ onMounted(async ()=>{
   // userimg.value = 'src/assets/img/head_portrait.jpg'
   let underline = document.getElementsByClassName('underline')[0].style
   underline.left = (id - 1) * 19.2 + "%"
+
 })
 </script>
 
@@ -308,7 +323,7 @@ onMounted(async ()=>{
         :userinnername="userinnername"
         @closeinner="closeinner"
       ></Dialog>
-        <div class="content">
+        <div element element-loading-text="Loading..." v-loading="loadingv" class="content">
           <div class="header"> 
               <el-switch 
               v-model="switchvalue" 
@@ -320,7 +335,7 @@ onMounted(async ()=>{
             <el-icon class="iconstyle" :size="30" @click="close" > <Minus/> </el-icon>
 
           </div>
-          <div class="bottom">
+          <div  class="bottom">
             <div  v-if="nowvalue === 1 || nowvalue === 2" class="bottom-up">
               <div class="avatar">
                 <!-- <img/ > -->
@@ -360,19 +375,20 @@ onMounted(async ()=>{
                 </div>
               </div>
             </div>
-             <!-- 默认情况下为最后一次聊天记录 -->
+             <!-- 这里是显示满足条件的personlist -->
             <div v-if="nowvalue===4" class="bottom-up">
               <div  class="online-person1">
                 <div class="person-cards-wrapper1">
+                  <!-- 我们是通过调用closeinner方法来实现逐层关闭的 -->
                 <div
-                    v-for="personInfo in personlist"
-                    :key="personInfo.id"
-                    @click="clickPerson(personInfo)"
+                    v-for="messageInfo in Messagelist"
+                    :key="messageInfo.id"
                     
                 >
                     <PersonTalk
-                    :personInfo="personInfo"
-                    :pcCurrent="pcCurrent"
+                    :messageInfo="messageInfo"
+                    :msgCurrent="msgCurrent"
+                    
                     ></PersonTalk>
                 </div>
                 </div>

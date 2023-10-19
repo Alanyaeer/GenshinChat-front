@@ -27,15 +27,12 @@ export const useUserStore = defineStore(
       await getuserInfo(params).then((res)=>{
         userInfo = res
       })
-      console.log(userInfo);
-
+      // console.log(userInfo);
       return userInfo
     }
     const setUser = async (obj)=>{
       userInfo = obj
-      await saveuserInfo(userInfo).then((res)=>{
-        console.log(res);
-      })
+      await saveuserInfo(userInfo)
       getUser()
     }
     // const 

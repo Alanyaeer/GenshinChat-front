@@ -10,7 +10,10 @@ import FileCard from "../../../components/FileCard.vue";
 import { ref, onMounted, watch ,defineProps, defineEmits, nextTick, getCurrentInstance} from 'vue'
 
 import { VideoCamera,Phone, Document, PictureRounded } from '@element-plus/icons-vue';
+import { useUserStore } from '@/stores';
+import {formatTime} from '@/utils/format.js'
 // 声明变量
+const userstore = useUserStore()
 const chatList = ref([])
 const inputMsg = ref("")  
 const showEmoji = ref(false)
@@ -28,22 +31,29 @@ const emit = defineEmits(['personCardSort'])
 // 获取聊天记录
 const getFriendChatMsg = async () => {
   let params = {
-    frinedId: props.friendInfo.id,
+    friendId: props.friendInfo.id,
   };
+  console.log(params);
   await getChatMsg(params).then((res) => {
     chatList.value = res;
-    chatList.value.forEach((item) => {
-      if (item.chatType == 2 && item.extend.imgType == 2) {
-        srcImgList.value.push(item.msg);
-      }
-    });
-    scrollBottom();
-
+    if(!chatList.value){
+      chatList.value = []
+    }
+      chatList.value.forEach((item) => {
+        if (item.chatType == 2 && item.extend.imgType == 2) {
+          srcImgList.value.push(item.msg);
+        }
+      });
+      scrollBottom();
   });
 }
 // 发送信息
 const sendMsg = (msgList) => {
+  if(!chatList.value){
+      chatList.value = []
+    }
   chatList.value.push(msgList);
+  console.log(msgList);
   scrollBottom();
 }
 //获取窗口高度并滚动至最底层
@@ -54,22 +64,33 @@ const scrollBottom = () => {
     scrollDom.scrollTop = scrollDom.scrollHeight;
   })
 }
+const mycontent = async () => {
+  for(let i = 0; i < chatList.length; ++i){
+    console.log(chatlist.value[i].uid);
+
+  }
+  let userInfo = await userstore.getUser()
+  return {
+    headImg: userInfo.userimg,
+    name: userInfo.username,
+    uid: userInfo.userid,
+    time: formatTime(new Date()),
+
+  }
+}
 // 关闭标签页
 const clickEmoji = () => {
   showEmoji.value = !showEmoji.value;
 }
 // 发送消息
-const sendText = () => {
+const sendText = async () => {
+  
   if (inputMsg.value) {
+    let curobj = await mycontent();
     let chatMsg = {
-    // 就是本人的信息
-
-      headImg: new URL("@/assets/img/head_portrait.jpg", import.meta.url).href,
-      name: "大毛是小白",
-      time: "09：12 AM",
+      ...curobj,
       msg: inputMsg.value,
       chatType: 0, //信息类型，0文字，1图片
-      uid: "1001", //uid
     };
     sendMsg(chatMsg);
 
@@ -81,35 +102,31 @@ const sendText = () => {
   }
 }
 // 发送表情
-const sendEmoji = (msg) => {
+const sendEmoji = async (msg) => {
+  let curobj = await mycontent();
   let chatEmoji = {
-      headImg: new URL("@/assets/img/head_portrait.jpg", import.meta.url).href,
-      name: "大毛是小白",
-      time: "09：12 AM",
+      ...curobj,
       msg: msg,
       chatType: 1, //信息类型，0文字，1图片
       extend: {
         imgType: 1, //(1表情，2本地图片)
       },
-      uid: "1001",
     };
     sendMsg(chatEmoji);
     clickEmoji();
 
 }
 // 发送本地图片
-const sendImg = (e) => {
+const sendImg = async (e) => {
+  let curobj = await mycontent();
   // console.log(e.target.files);
   let chatfiles = {
-    headImg: new URL("@/assets/img/head_portrait.jpg", import.meta.url).href,
-    name: "大毛是小白",
-    time: "09：12 AM",
     msg: "",
     chatType: 1, //信息类型，0文字，1图片, 2文件
     extend: {
       imgType: 2, //(1表情，2本地图片)
     },
-    uid: "1001",
+    ...curobj
   };
   let files = e.target.files[0];
   if (!e || !window.FileReader) return;
@@ -127,17 +144,15 @@ const sendImg = (e) => {
   e.target.files = null;
 }
 // 发送文件
-const sendFile = (e) => { 
+const sendFile = async (e) => { 
+  let curobj = await mycontent();
   let chatFile = {
-    headImg: new URL("@/assets/img/head_portrait.jpg", import.meta.url).href,
-    name: "大毛是小白",
-    time: "09：12 AM",
     msg: "",
     chatType: 2, //信息类型，0文字，1图片, 2文件
     extend: {
       fileType: "", //(1word，2excel，3ppt，4pdf，5zpi, 6txt)
     },
-    uid: "1001",
+    ...curobj
   };
   let files = e.target.files[0]; //图片文件名
   chatFile.msg = files;
@@ -203,7 +218,7 @@ watch(
   <div class="chat-window">
     <div class="top">
       <div class="head-pic">
-        <HeadPortrait :imgUrl="props.friendInfo.headImg"></HeadPortrait>
+        <HeadPortrait :imgUrl="props.friendInfo.headImg" ></HeadPortrait>
       </div>
       <div class="info-detail">
         <div class="name">{{ props.friendInfo.name }}</div>
@@ -242,7 +257,7 @@ watch(
     <div class="botoom">
       <div class="chat-content" ref="chatContent">
         <div class="chat-wrapper " v-for="item in chatList" :key="item.id">
-          <div class="chat-friend" v-if="item.uid !== '1001'">
+          <div class="chat-friend" v-if="item.uid !== userstore.userid">
             <div class="chat-text " v-if="item.chatType == 0">
               {{ item.msg }}
             </div>

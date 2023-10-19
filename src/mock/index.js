@@ -4,25 +4,34 @@ import Mock from 'mockjs'
 
 Mock.mock(/friend\/friendList/, 'post', (id) => { //三个参数。第一个：路径，第二个：请求方式post/get，第三个：回调，返回值
     let ids = JSON.parse(id.body)
-    if(ids.id == "1002"){
-    console.log('here');
+    if(ids.id == "1001"){
 
         return friendList
     }
 })
+Mock.mock(/api\/searchfriends/, 'post', (id) => { //三个参数。第一个：路径，第二个：请求方式post/get，第三个：回调，返回值
+    let ids = JSON.parse(id.body)
+    if(ids.id == "1001"){
 
+        return friendList
+    }
+})
 Mock.mock(/friend\/chatMsg/, 'post', (config) => { //三个参数。第一个：路径，第二个：请求方式post/get，第三个：回调，返回值
     let params = JSON.parse(config.body)
-    if (params.frinedId == "1002")
+    
+    if (params.friendId == "1002")
         return chatMsg1002
-    if (params.frinedId == "1003")
+    if (params.friendId == "1003")
         return chatMsg1003
-    if (params.frinedId == "1004")
+    if (params.friendId == "1004")
         return chatMsg1004
 })
 
 Mock.mock(/api\/login/, 'post', (objs)=>{
     let obj = JSON.parse(objs.body)
+    if(obj.id ==="1001" && obj.password === "123456"){
+        return apiuser0
+    }
     if(obj.id === "1002" && obj.password === "123456"){
         return apiuser1
     }
@@ -62,6 +71,9 @@ let apiregisteruser3 = Mock.mock(
 )
 Mock.mock(/api\/getuserInfo/, 'post', (objs) => {
     let obj = JSON.parse(objs.body)
+    if(obj.id === '1001'){
+        return apiuserInfo0
+    }
     if(obj.id === '1002'){
         return apiuserInfo1
     }
@@ -72,6 +84,18 @@ Mock.mock(/api\/getuserInfo/, 'post', (objs) => {
         return apiuserInfo3
     }
 })
+let apiuserInfo0 = Mock.mock(
+    {
+        // data: {
+        userid: '1001',
+        username: '大鬼',
+        userimmg: '',
+        userimg: new URL("@/assets/img/head_portrait12.jpg", import.meta.url).href,
+        userdetail: '我是大鬼'
+        
+        // }
+    }
+)
 let apiuserInfo1 = Mock.mock(
     {
         // data: {
@@ -108,6 +132,9 @@ let apiuserInfo3 = Mock.mock(
         // }
     }
 )
+let apiuser0 = Mock.mock(
+    "1"
+)
 let apiuser1 = Mock.mock(
     "1"
 )
@@ -126,6 +153,7 @@ let friendList = Mock.mock(
             lastMsg: "to do",
             id: "1002",
             headImg: new URL("@/assets/img/head_portrait4.jpg", import.meta.url).href,
+            status: true
 
         },
         {
@@ -135,7 +163,7 @@ let friendList = Mock.mock(
             lastMsg: "dada dw ertgthy juy",
             id: "1003",
             headImg: new URL("@/assets/img/head_portrait5.jpg", import.meta.url).href,
-
+            status: false
         },
         {
             img: "",
@@ -144,7 +172,7 @@ let friendList = Mock.mock(
             lastMsg: "大萨达萨达所大大萨达",
             id: "1004",
             headImg: new URL("@/assets/img/head_portrait6.jpg", import.meta.url).href,
-
+            status: false
         },
         {
             img: "",
@@ -153,6 +181,7 @@ let friendList = Mock.mock(
             lastMsg: "哇哈哈哈哈哈哈",
             id: "1005",
             headImg: new URL("@/assets/img/head_portrait7.jpg", import.meta.url).href,
+            status: false
         },
         {
             img: "",
@@ -161,6 +190,7 @@ let friendList = Mock.mock(
             lastMsg: "阿巴斯的后果的",
             id: "1006",
             headImg: new URL("@/assets/img/head_portrait8.jpg", import.meta.url).href,
+            status: false
         },
         {
             img: "",
@@ -169,6 +199,7 @@ let friendList = Mock.mock(
             lastMsg: "啊递归传播得",
             id: "1007",
             headImg: new URL("@/assets/img/head_portrait9.jpg", import.meta.url).href,
+            status: true
         },
         {
             img: "",
@@ -177,6 +208,7 @@ let friendList = Mock.mock(
             lastMsg: "上次护照吕大巴搜集",
             id: "1008",
             headImg: new URL("@/assets/img/head_portrait10.jpg", import.meta.url).href,
+            status: true
         },
         {
             img: "",
@@ -185,6 +217,7 @@ let friendList = Mock.mock(
             lastMsg: "出租租个牛的",
             id: "1009",
             headImg: new URL("@/assets/img/head_portrait11.jpg", import.meta.url).href,
+            status: false
         },
         {
             img: "",
@@ -193,6 +226,7 @@ let friendList = Mock.mock(
             lastMsg: "安科技公司仓库吧",
             id: "1010",
             headImg: new URL("@/assets/img/head_portrait12.jpg", import.meta.url).href,
+            status: true
         },
         {
             img: "",
@@ -201,6 +235,7 @@ let friendList = Mock.mock(
             lastMsg: "看见这次就随便",
             id: "1011",
             headImg: new URL("@/assets/img/head_portrait13.jpg", import.meta.url).href,
+            status: true
         },
         {
             img: "",
@@ -209,6 +244,7 @@ let friendList = Mock.mock(
             lastMsg: "成都你哦在",
             id: "1012",
             headImg: new URL("@/assets/img/head_portrait14.jpg", import.meta.url).href,
+            status: false
         },
         {
             img: "",
@@ -217,6 +253,7 @@ let friendList = Mock.mock(
             lastMsg: "看哎是非常比",
             id: "1013",
             headImg: new URL("@/assets/img/head_portrait15.jpg", import.meta.url).href,
+            status: true
         },
     ]
 )
