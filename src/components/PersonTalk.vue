@@ -32,7 +32,12 @@ watch(
           </div>
     </div>
     <div class="message">
-
+      <span class="font">
+        {{ messageInfo.time+ ':  ' }}
+      </span>
+      <span class="font">
+        {{ messageInfo.msg }}
+      </span>
     </div>
   </div>
 </template>
@@ -81,6 +86,7 @@ watch(
     background-color: #151414;
     position:relative;
     // width: 100%;
+
     // height: 100%;
     top: 50%;
     left: 40%;
@@ -88,6 +94,16 @@ watch(
     height: 80%;
     opacity: 0.8;
     width: 55%;
+    display: flex;
+    .font{
+      padding-top: 20%;
+      position: relative;
+      font-weight: bold;
+      padding-left: 10%;
+      color: white;
+      // justify-content: center;
+
+    }
   }
   &:hover {
     background-color: #1d90f5;

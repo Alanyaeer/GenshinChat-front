@@ -8,26 +8,24 @@ import ManagePage from './manage/ManagePage.vue'
 </script>
 <template>
     <div class="bg">
-        <div class="userinfo">
-            <ManagePage></ManagePage>
-            <ei-icon><Sunrise/></ei-icon>
-        </div>
+        <img class="avatar" src="@/assets/img/head_portrait5.jpg">
     </div>
 </template>
 
 <style>
     .bg{
         /* background-color: rgb(215, 175, 175); */
-        background-color: rgb(65, 70, 70);
+        background-color: rgb(217, 209, 209);
         height: 100vh;
         width : 100vw;
-        .userinfo{
-            position: absolute;
-            /* left: 50%;
+        .avatar{
+            position: relative;
+            left: 50%;
             top: 50%;
-            width: 5%;
-            height: 5%; */
-            /* transform:  translate(-50%,-50%); */
+            transform: translate(-50%,-50%);
+            box-shadow: 18px 18px 30px rgba(0, 0,0,0.2),
+                        -18px  -18px 30px rgba(255, 255, 255, 1);
+
         }
     }
 

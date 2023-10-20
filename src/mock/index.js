@@ -18,13 +18,22 @@ Mock.mock(/api\/searchfriends/, 'post', (id) => { //三个参数。第一个：�
 })
 Mock.mock(/friend\/chatMsg/, 'post', (config) => { //三个参数。第一个：路径，第二个：请求方式post/get，第三个：回调，返回值
     let params = JSON.parse(config.body)
-    
-    if (params.friendId == "1002")
+    if( params.msg == '你好'){
+        console.log(1);
+        return chatMsg1005
+    }
+    if (params.friendId == "1002"){
+        console.log(3);
         return chatMsg1002
-    if (params.friendId == "1003")
+    }
+    if (params.friendId == "1003"){
+        console.log(4);
         return chatMsg1003
-    if (params.friendId == "1004")
+    }
+    if (params.friendId == "1004"){
+        console.log(5);
         return chatMsg1004
+    }
 })
 
 Mock.mock(/api\/login/, 'post', (objs)=>{
@@ -425,5 +434,57 @@ let chatMsg1004 = Mock.mock(
             chatType: 0, //信息类型，0文字，1图片
             uid: "1002", //uid
         },
+    ]
+)
+let chatMsg1005 = Mock.mock(
+    [
+        {
+            headImg: new URL("@/assets/img/head_portrait8.jpg", import.meta.url).href,
+            name: "张三",
+            time: "09：12 AM",
+            msg: " 你好",
+            chatType: 0, //信息类型，0文字，1图片
+            uid: "1001", //uid
+        },
+        {
+            headImg: new URL("@/assets/img/head_portrait8.jpg", import.meta.url).href,
+            name: "张三",
+            time: "09：12 AM",
+            msg: "你好",
+            chatType: 0, //信息类型，0文字，1图片
+            uid: "1002", //uid
+        },
+        {
+            headImg: new URL("@/assets/img/head_portrait8.jpg", import.meta.url).href,
+            name: "张三",
+            time: "09：12 AM",
+            msg: "张三",
+            chatType: 0, //信息类型，0文字，1图片
+            uid: "1002", //uid
+        },
+        {
+            headImg: new URL("@/assets/img/head_portrait10.jpg", import.meta.url).href,
+            name: "苏吹",
+            time: "09：12 AM",
+            msg: " 你好",
+            chatType: 0, //信息类型，0文字，1图片
+            uid: "1001", //uid
+        },
+        {
+            headImg: new URL("@/assets/img/head_portrait10.jpg", import.meta.url).href,
+            name: "苏吹",
+            time: "09：12 AM",
+            msg: "你好",
+            chatType: 0, //信息类型，0文字，1图片
+            uid: "1002", //uid
+        },
+        {
+            headImg: new URL("@/assets/img/head_portrait10.jpg", import.meta.url).href,
+            name: "苏吹",
+            time: "09：12 AM",
+            msg: "你好",
+            chatType: 0, //信息类型，0文字，1图片
+            uid: "1002", //uid
+        }
     ]
 )

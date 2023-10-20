@@ -29,6 +29,7 @@
   
   <style lang="scss" scoped>
   .head-portrait {
+    
       width: 50px;
       height: 50px;
       border-radius: 50%;

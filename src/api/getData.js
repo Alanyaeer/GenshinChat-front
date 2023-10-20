@@ -3,7 +3,7 @@ let axios = base.axios
 let baseUrl = base.baseUrl
 
 // 获取好友
-export const getFriend = params => {
+export const getFriend = (params) => {
     return axios({
       method: 'post',
       baseURL: `${baseUrl}/friend/friendList`,
@@ -12,7 +12,7 @@ export const getFriend = params => {
 }
 
   // 获取聊天信息, 这里可以拓展方法比如 msg，time, friendId
-export const getChatMsg = params => {
+export const getChatMsg = (params) => {
   return axios({
     method: 'post',
     baseURL: `${baseUrl}/friend/chatMsg`,

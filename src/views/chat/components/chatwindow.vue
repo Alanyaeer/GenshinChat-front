@@ -1,9 +1,6 @@
 <script setup>
 import { animation} from '../../../utils/util.js'
 import { getChatMsg } from "../../../api/getData.js";
-// import HeadPortrait from "@/components/HeadPortrait";
-// import Emoji from "@/components/Emoji";
-// import FileCard from "@/components/FileCard.vue";
 import HeadPortrait from "../../../components/HeadPortrait.vue";
 import Emoji from "../../../components/Emoji.vue";
 import FileCard from "../../../components/FileCard.vue";
@@ -25,6 +22,7 @@ const props = defineProps({
   friendInfo: Object,
   default: () => ({})
 })
+const FileList = ref([])
 // 发送消息给父组件
 const emit = defineEmits(['personCardSort'])
 // methods
@@ -54,6 +52,7 @@ const sendMsg = (msgList) => {
     }
   chatList.value.push(msgList);
   console.log(msgList);
+
   scrollBottom();
 }
 //获取窗口高度并滚动至最底层
@@ -118,6 +117,7 @@ const sendEmoji = async (msg) => {
 }
 // 发送本地图片
 const sendImg = async (e) => {
+  console.log(e);
   let curobj = await mycontent();
   // console.log(e.target.files);
   let chatfiles = {
@@ -129,6 +129,7 @@ const sendImg = async (e) => {
     ...curobj
   };
   let files = e.target.files[0];
+  console.log(window.FileReader);
   if (!e || !window.FileReader) return;
   let reader = new FileReader();
   reader.readAsDataURL(files);
@@ -136,11 +137,12 @@ const sendImg = async (e) => {
     console.log(reader.result);
     chatfiles.msg = es.target.result; //赋值
     srcImgList.value.push(chatfiles.msg);
+
   };
-  console.log(chatfiles);
   setTimeout(()=>{
-    sendMsg(chatfiles);
-  }, 100)
+      sendMsg(chatfiles);
+    },1000)
+
   e.target.files = null;
 }
 // 发送文件
@@ -155,6 +157,8 @@ const sendFile = async (e) => {
     ...curobj
   };
   let files = e.target.files[0]; //图片文件名
+  console.log(files);
+
   chatFile.msg = files;
   // console.log(files);
   if (files) {
@@ -184,9 +188,24 @@ const sendFile = async (e) => {
       default:
         chatFile.extend.fileType = 0;
     }
-    console.log(chatFile);
-    sendMsg(chatFile);
-    e.target.files = null;
+    setTimeout(()=>{
+      sendMsg(chatFile);
+    },5000)
+
+
+    let reader = new FileReader()
+    reader.readAsDataURL(files)
+    reader.onload = (es) => {
+     chatFile.msg = es.target.result
+      if(!FileList.value){
+       FileList.value = []
+      }
+       FileList.value.push(chatFile.msg)
+        
+      
+    }
+     e.target.files = null;
+
   }
 }
 // 发送语音
@@ -354,6 +373,7 @@ watch(
   position: relative;
 
   .top {
+
     margin-bottom: 50px;
     &::after {
       content: "";
@@ -391,10 +411,13 @@ watch(
         color:#757889;
         margin-left: 30px;
         cursor: pointer;
+        // box-shadow: 4px 4px 8px  rgba(0, 0, 0, 2.1),
+        //         -1px -1px 3px rgba(255, 255, 255, 2.1);
+        border-radius: 10px;
       }
       .other_fun_icon:hover{
         color:#1D90F5;
-        
+        // background-color: #1D90F5;
       }
 
     }
@@ -407,6 +430,7 @@ watch(
     padding: 20px;
     box-sizing: border-box;
     position: relative;
+    
     .chat-content {
       width: 100%;
       height: 85%;
@@ -526,6 +550,8 @@ watch(
       .boxinput {
         width: 50px;
         height: 50px;
+        box-shadow: 4px 4px 8px  rgba(0, 0, 0, 2.1),
+                -1px -1px 3px rgba(255, 255, 255, 2.1);
         background-color: rgb(66, 70, 86);
         border-radius: 15px;
         border: 1px solid rgb(80, 85, 103);
@@ -542,7 +568,9 @@ watch(
       }
       .emoji {
         transition: 0.3s;
-        box-shadow:  0px 0px 4px 1px rgb(34, 135, 225);
+        // box-shadow:  0px 0px 4px 1px rgb(34, 135, 225);
+        box-shadow: 4px 4px 8px  rgba(0, 0, 0, 2.1),
+                -1px -1px 3px rgba(255, 255, 255, 2.1); 
         &:hover {
           background-color: rgb(46, 49, 61);
           border: 1px solid rgb(71, 73, 82);
@@ -556,8 +584,10 @@ watch(
         background-color: rgb(66, 70, 86);
         border-radius: 15px;
         border: 2px solid rgb(34, 135, 225);
+        box-shadow: 4px 4px 8px  rgba(0, 0, 0, 2.1),
+                -1px -1px 3px rgba(255, 255, 255, 2.1);
         // box-shadow: 0;
-        // box-shadow: 0px 0px 12px 1px rgb(34, 135, 225);
+        box-shadow: 0px 0px 12px 1px rgb(34, 135, 225);
         box-shadow: inset 0px 0px 4px 1px rgb(34, 135, 225);
         padding: 10px;
         box-sizing: border-box;

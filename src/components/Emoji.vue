@@ -66,6 +66,7 @@ export default {
 
 <style lang="scss" scoped>
 .emoji-content {
+  
   .emoji {
   width: 400px;
   height: 200px;

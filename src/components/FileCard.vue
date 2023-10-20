@@ -11,7 +11,7 @@
       <span
         >{{file.name || '未知'}}</span
       >
-      <span>154kb</span>
+      <!-- <span>154kb</span> -->
     </div>
   </div>
 </template>

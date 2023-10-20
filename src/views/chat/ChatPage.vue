@@ -151,12 +151,13 @@ onMounted(async () => {
         
 
         <el-row class="chatPageheader">
-        <div>
+        <div >
             <el-avatar
                 class="mr-3"
                 :size="45"
                 :src="avatarUrl"
             />
+
         </div>
         <div class="search-box">
             <input class="search-txt" type="text" placeholder="Type to search" />
@@ -172,21 +173,27 @@ onMounted(async () => {
 
 
         <el-col :span="leftsize" class="leftcomponent"> 
-
             <!-- 扩展功能 -->
-            <el-icon class="iconbg" @click="Fullexpend"><FullScreen/>
-            </el-icon>
+            <div class="iconbg"> <el-icon  @click="Fullexpend"><FullScreen/></el-icon>
+                <span class="font"  >扩展</span> 
+            </div>
             <!-- 管理自己的状态 -->
-            <el-icon class="iconbg" @click="manage(1)"><User /></el-icon>
+            <div class="iconbg"> <el-icon  @click="manage(1)"><User /></el-icon>
+                <span class="font" >管理</span>
+            </div>
             <!-- 添加好友 -->
-            <el-icon class="iconbg" @click="manage(2)"><CirclePlus /></el-icon>
-            <!-- 设置 -->
-            <el-icon class="iconbg" @click="manage(3)"><Delete /></el-icon>
-            <!-- 设置 -->
-            <el-icon class="iconbg" @click="manage(4)"><Search/></el-icon>
-            <!-- 结束 -->
-            <el-icon class="iconbg" @click="logout"><SwitchButton /></el-icon>
-            <!-- <div class="underline"> -->
+            <div class="iconbg"><el-icon  @click="manage(2)"><CirclePlus /></el-icon>
+                <span class="font" >添加</span>
+            </div>
+            <!-- 删除好友 -->
+            <div class="iconbg"><el-icon  @click="manage(3)"><Delete /></el-icon>
+                <span class="font" >删除</span>
+            </div>
+            <!-- 搜索 -->
+            <div class="iconbg"> <el-icon  @click="manage(4)"><Search/></el-icon>
+                <span class="font" >搜索</span>
+            </div>
+        
 
         </el-col>
         <!-- 中间的列表选择框 -->
@@ -370,26 +377,41 @@ onMounted(async () => {
         min-height: 400px;
     }
     .leftcomponent { 
+        position: relative;
         transition: 0.5s;
-        padding-top : 5%;
-
+        padding-top : 1%;
+        padding-right: 1%;
         // background-image: linear-gradient(to bottom,  #232D4A,  #4f66ac);
         background-color: #323644;
         font-size: 40px;
         display: flex;  
-        gap : 10%;
+        // padding-bottom: 1%;
+        gap : 8%;
         padding-left: 0.7%;
         flex-direction: column;
+        justify-content: center;
         height: 93vh;
         opacity: .7;
         cursor: pointer;
-        -webkit-text-stroke: 1px #fff;
+        // -webkit-text-stroke: 1px #fff;
         .iconbg {
-            color: #C3C7D1;
+            // font-size: large;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            border-radius: 8px;
+            .font{
 
+                color: rgb(235, 224, 224);
+            
+                padding-top: 8px;
+                font-size: 15px;
+                padding-left: 4.5px;
+            }
         }
         .iconbg:hover{
             // background-image: linear-gradient(to right, #336DF4, #33D6C0);
+            // color: #000;
             color: #336DF4;
             filter: drop-shadow(0 0 10px #336DF4) drop-shadow(0 0 20px #336DF4);
         
@@ -410,6 +432,7 @@ onMounted(async () => {
             padding-left: 10px;
             font-size: 25px;
             font-family: dogica;
+
         }
         .online-person {
             margin-top: 50px;
@@ -492,6 +515,7 @@ onMounted(async () => {
                 background-color: #272A37;
                 width: 96%;
                 border-radius: 15px;
+                
             }
             .emptychaticon{
                 position: absolute;

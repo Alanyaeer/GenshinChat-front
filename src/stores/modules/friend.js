@@ -4,7 +4,16 @@ import {getFriend, getChatMsg} from '@/api/getData'
 export const useUserStore = defineStore(
   'chat-friend',
   () => {
-    const personList = ref([])
+    const chatList = ref([])
+    const start = 0
+    const end = 0
+    const saveMsg = (msg, friend) => {
+      chatList = []
+      
+    }
+    const startMsg = ()=>{
+
+    }
     // const 
   },
   {

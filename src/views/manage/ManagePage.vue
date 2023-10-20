@@ -58,6 +58,7 @@ const textshow = ref('确认')
 const userStore = useUserStore()
 const userimmg = ref('')
 const Messagelist = ref([])
+const allpersonlist = ref([])
 const msgCurrent  = ref('')
 const firstin = (id)=>{
 
@@ -68,7 +69,7 @@ const firstin = (id)=>{
 }
 // tab交换时刻
 const emptyuser = ()=>{
-  userimg.value = 'src/assets/img/genshinchat.png'  
+  userimg.value = new URL("@/assets/img/genshinchat.png", import.meta.url).href,  
   username.value = ''
   userdetail.value = ''
   userid.value = ''
@@ -171,17 +172,17 @@ const searchfriend = async ()=>{
       let useridsss = {
         id: user.userid
       }
-      personlist.value = await searchfriends(useridsss)
-      console.log(personlist.value);
+      allpersonlist.value = await searchfriends(useridsss)
+      console.log(allpersonlist.value);
       // console.log(personlist.value);
       let isfind = false
       // console.log(object);
-      for(let i = 0; i < personlist.value.length; ++i){
-        if(personlist.value[i].id === searchvalue.value){
-          username.value= personlist.value[i].name
-          userdetail.value = personlist.value[i].detail
-          userid.value = personlist.value[i].id
-          userimg.value = personlist.value[i].headImg
+      for(let i = 0; i < allpersonlist.value.length; ++i){
+        if(allpersonlist.value[i].id === searchvalue.value){
+          username.value= allpersonlist.value[i].name
+          userdetail.value = allpersonlist.value[i].detail
+          userid.value = allpersonlist.value[i].id
+          userimg.value = allpersonlist.value[i].headImg
           isfind = true
         }
       }
@@ -192,21 +193,52 @@ const searchfriend = async ()=>{
         userid.value = ''
         userimg.value = 'src/assets/img/genshinchat.png'  
       }
+      
   }
   // nowvalue为4的时候， 也就是搜索聊天记录
-  else {
-  
+  else if(nowvalue.value ===4){
+    let searchvalue_string = searchvalue.value.trim()
+      // let searchvalue_obj = JSON.parse(searchvalue_string)
+    let userInfo = await userStore.getUser()
+    console.log(userInfo);
     let params = {
-
+      friendId: '',
+      myId: userInfo.userid,
+      msg: searchvalue_string
     }
-    getChatMsg
+    console.log(params);
+    console.log(await getChatMsg(params));
+    Messagelist.value = await getChatMsg(params)
+    console.log('hello');
+    // getChatMsg
+  }
+  else {
+    let id = searchvalue.value.trim()
+    if(id !== personlist.value[0].id){
+        let nowPersonInfo = {}
+        let isSort = false
+        for(let i = 1; i < personlist.value.length; i++){
+            if(id === personlist.value[i].id){
+                nowPersonInfo = personlist.value[i]
+            // 扔掉这个元素
+                personlist.value.splice(i, 1)
+                isSort = true
+                break
+            }
+
+        }
+        // 在首部添加这个元素
+        if(isSort === true){
+            personlist.value.unshift(nowPersonInfo)
+            document.getElementsByClassName('person-cards-wrapper')[0].scrollTo(0, 'smooth')
+        }
+    }
   }
   searchvalue.value = ''
   // 检测id的类型
   }
     // new URL("@/assets/img/head_portrait7.jpg", import.meta.url).href
     // 获取到数据填入到里面 
-    
 
 }
 
@@ -250,7 +282,6 @@ const getuserInfo = async ()=>{
 }
 const closeinner = async (id)=>{
   showDialog.value = false
-  
   if(id === 1){
     const ids = {
       id : id
@@ -262,12 +293,12 @@ const closeinner = async (id)=>{
         }
       }
       await deletefriend(ids)
-
       ElMessage.success('删除成功')
     }
     else{
       // getChatMsg
       //需要修改这里为MessageList
+
       close()
       let info = {}
       for(let i = 0; i < Messagelist.value.length; ++i){
@@ -323,7 +354,7 @@ onMounted(async ()=>{
         :userinnername="userinnername"
         @closeinner="closeinner"
       ></Dialog>
-        <div element element-loading-text="Loading..." v-loading="loadingv" class="content">
+        <div element element-loading-text="加载中..." v-loading="loadingv" class="content">
           <div class="header"> 
               <el-switch 
               v-model="switchvalue" 
@@ -377,13 +408,13 @@ onMounted(async ()=>{
             </div>
              <!-- 这里是显示满足条件的personlist -->
             <div v-if="nowvalue===4" class="bottom-up">
-              <div  class="online-person1">
-                <div class="person-cards-wrapper1">
+              <div v-if="Messagelist.length > 0"  class="online-person1">
+                <div  class="person-cards-wrapper1">
                   <!-- 我们是通过调用closeinner方法来实现逐层关闭的 -->
                 <div
                     v-for="messageInfo in Messagelist"
                     :key="messageInfo.id"
-                    
+                    @click="clickPerson(personInfo)"
                 >
                     <PersonTalk
                     :messageInfo="messageInfo"
@@ -392,17 +423,30 @@ onMounted(async ()=>{
                     ></PersonTalk>
                 </div>
                 </div>
+                
               </div>
+              <div v-else>
+                  <img style="
+                    position: relative;
+                    padding-left: 65%;
+                    padding-top: 25%;
+                    height: 70%;
+                    /* width: 100%; */
+                    /* border-radius: 15px; */
+                  " src="src/assets/img/genshinchat.png">
+                </div>
             </div>  
+
             <div  class="bottom-down">
             <Transition>
-              <div v-if="nowvalue !== 1" class="search-box">
+              <div v-if="nowvalue === 3 || nowvalue === 2" class="search-box">
                   <input class="search-txt" type="text" v-model="searchvalue" placeholder="请输入userid 或者 聊天记录" />
                   <a class="search-btn">
                       <i class="fas fa-search"><el-icon @click="searchfriend" :size="20"><Search /></el-icon></i>
                   </a>
               </div>
               <div v-else >
+
                 <el-button
                   @click="showhead = true"
                   class="button three-d"
@@ -458,7 +502,15 @@ onMounted(async ()=>{
     // justify-content: center;
     opacity: 0.8;
     // box-shadow: 1px, 1px, 5px, 5px rgba(190, 42, 42, 1.2);
-    box-shadow:0px 0px 25px 3px rgba(135, 143, 158, 3.1);
+    // box-shadow:0px 0px 25px 10px rgba(135, 143, 158, 3.1);
+    // box-shadow:0px 0px 25px 10px rgba(0, 0, 0, 3.1);
+    
+    box-shadow: 3px 3px 8px  rgba(0, 0, 0, 2.1),
+                -1px -1px 3px rgba(255, 255, 255, 2.1),
+                inset 2px 2px 5px 0px rgba(255, 255, 255, 2.1),
+                inset -2px -2px 15px 0px rgba(0, 0, 0, 2.1);
+                
+    // box-shadow: 5px 5px 10px 0px rgba(0, 0, 0, 3.1);  
     z-index: 2002;
     border-bottom: 3px solid rgba(255, 255, 255, .2);
     transform: translate(-50%, -50%);
@@ -516,14 +568,15 @@ onMounted(async ()=>{
           display: flex;
           border-radius: 10px;
           .avatar{
-            box-shadow: 0, 0, 10px, 0, green;
             // overflow: hidden;
             position: relative;
             padding-top: 3%;
             padding-right: 7%;
-            padding-left: 7%;
+            padding-left: 5%;
             width: 40%;
-            height: 68%;
+            height: 80%;
+            top: 3%;
+            left: 3%;
             // background-color: #434743;
           }
           .inputmesg{
@@ -562,11 +615,16 @@ onMounted(async ()=>{
                 color: #fff;
                 font-weight: bold;
                 outline: none;
-                box-shadow: 0px 0px 5px 0px #000;
+                // box-shadow: 
+                box-shadow: -1px -1px 1px rgba(255,255, 255, 3.1),
+                            3px 3px 7px rgba(0, 0, 0, 3.2);
+                            
               }
             }
           
             .button {
+              box-shadow: -2px -2px 1px rgba(255,255, 255, 3.1),
+                            3px 3px 7px rgba(0, 0, 0, 3.2);
               position: relative;
               width: 50%;
               height: 15%;
@@ -581,10 +639,10 @@ onMounted(async ()=>{
             // transform: translate(-50%, -50%);
             // background-image: linear-gradient(to right, #e1eeea, #d3e2eb);
             // 
-            border-width: 0;
-            background-color: #2f3640;
-            // border
-            border-radius: 30px;
+              border-width: 0;
+              background-color: #2f3640;
+              // border
+              border-radius: 30px;
             // 字体
             .font {
               // font-
@@ -641,6 +699,8 @@ onMounted(async ()=>{
                     background-color: rgb(50, 54, 68);
                     position: relative;
                     margin: 25px 0;
+                    // box-shadow: -2px -2px 1px rgba(255,255, 255, 3.1),
+                    //         3px 3px 7px rgba(0, 0, 0, 3.2);
                     cursor: pointer;
                     font-size: 20px;
                     &:hover {
@@ -843,7 +903,11 @@ onMounted(async ()=>{
               padding: 10px;
               width: 60%;
               padding-left: 5%;
-              box-shadow: 0px 0px 5px 0px #000;
+              // box-shadow: 0px 0px 5px 0px #000;
+              box-shadow: -1px -1px 1px rgba(255,255, 255, 3.1),
+                            3px 3px 7px rgba(0, 0, 0, 3.2),
+                            inset 0px 0px 3px 0px rgba(255, 255, 255, 2.1),
+                            inset -1px -1px 15px 0px rgba(0, 0, 0, 2.1);
               // .search-input {
           }
           .search-btn {
@@ -939,7 +1003,13 @@ onMounted(async ()=>{
   .bottomnav{
     color: #fff;
     border-bottom: 3px solid rgba(255, 255, 255, .2);
-    box-shadow:0px 0px 25px 3px rgba(135, 143, 158, 3.1);
+    // box-shadow:0px 0px 25px 3px rgba(135, 143, 158, 3.1);
+    // box-shadow: 2px 2px 2px  rgba(0, 0, 0, 2.1),
+    //             -1px -1px 2px rgba(255, 255, 255, 2.1);
+    box-shadow: -1px -1px 1px rgba(255,255, 255, 3.1),
+                  3px 3px 7px rgba(0, 0, 0, 3.2),
+                  inset 2px 2px 7px 0px rgba(255, 255, 255, 2.1),
+                  inset -1px -1px 15px 0px rgba(0, 0, 0, 5);
     background-color: #272A37;
     display : flex;
     gap : 8%;
