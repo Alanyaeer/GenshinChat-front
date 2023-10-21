@@ -10,11 +10,7 @@ Mock.mock(/friend\/friendList/, 'post', (id) => { //三个参数。第一个：�
     }
 })
 Mock.mock(/api\/searchfriends/, 'post', (id) => { //三个参数。第一个：路径，第二个：请求方式post/get，第三个：回调，返回值
-    let ids = JSON.parse(id.body)
-    if(ids.id == "1001"){
-
-        return friendList
-    }
+    return friendList
 })
 Mock.mock(/friend\/chatMsg/, 'post', (config) => { //三个参数。第一个：路径，第二个：请求方式post/get，第三个：回调，返回值
     let params = JSON.parse(config.body)
@@ -53,7 +49,7 @@ Mock.mock(/api\/login/, 'post', (objs)=>{
 })
 Mock.mock(/api\/register/, 'post', (objs)=>{
     let obj = JSON.parse(objs.body)
-    if(obj.id === "1002" ){
+    if(obj.id === "1002" && obj.password === "123456" && obj.repassword === "123456"){
         return apiregisteruser1
     }
     if(obj.id === "1003" ){
@@ -64,19 +60,13 @@ Mock.mock(/api\/register/, 'post', (objs)=>{
     }
 })
 let apiregisteruser1 = Mock.mock(
-    {
-        code: "1"
-    }
+     1
 )
 let apiregisteruser2 = Mock.mock(
-    {
-        code: "1"
-    }
+    1
 )
 let apiregisteruser3 = Mock.mock(
-    {
-        code: "0"
-    }
+    1
 )
 Mock.mock(/api\/getuserInfo/, 'post', (objs) => {
     let obj = JSON.parse(objs.body)
@@ -142,16 +132,16 @@ let apiuserInfo3 = Mock.mock(
     }
 )
 let apiuser0 = Mock.mock(
-    "1"
+    1
 )
 let apiuser1 = Mock.mock(
-    "1"
+    1
 )
 let apiuser2 = Mock.mock(
-    "1"
+    1
 )
 let apiuser3 = Mock.mock(
-    "0"
+    0
 )
 let friendList = Mock.mock(
     [

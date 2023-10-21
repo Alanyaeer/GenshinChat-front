@@ -123,10 +123,10 @@ const changetheme = () => {
 const register = async () => {
   await form.value.validate()
 
-  const {code} = await registeruser(formModel.value)
+  const code = await registeruser(formModel.value)
   console.log(code);
 
-  if(code === '1'){
+  if(code === 1){
     ElMessage.success('注册成功')
     isRegister.value = false
   }
@@ -138,13 +138,10 @@ const login = async()=>{
   // console.log(formModel.value);
 
   // console.log(code);
-  if(code === '1'){
+  if(code === 1){
     ElMessage.success('登录成功')
     userStore.userid = formModel.value.id
     router.push('chat')
-  }
-  else{
-    ElMessage.error('登录失败')
   }
 }
 </script>

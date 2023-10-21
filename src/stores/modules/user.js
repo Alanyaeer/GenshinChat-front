@@ -31,9 +31,9 @@ export const useUserStore = defineStore(
       return userInfo
     }
     const setUser = async (obj)=>{
-      userInfo = obj
-      await saveuserInfo(userInfo)
+      obj = await saveuserInfo(obj)
       getUser()
+      return obj
     }
     // const 
     return {

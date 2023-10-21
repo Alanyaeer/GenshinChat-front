@@ -5,10 +5,11 @@ import HeadPortrait from "../../../components/HeadPortrait.vue";
 import Emoji from "../../../components/Emoji.vue";
 import FileCard from "../../../components/FileCard.vue";
 import { ref, onMounted, watch ,defineProps, defineEmits, nextTick, getCurrentInstance} from 'vue'
-
+import { saveChatMsg} from '@/api/getData.js'
 import { VideoCamera,Phone, Document, PictureRounded } from '@element-plus/icons-vue';
 import { useUserStore } from '@/stores';
 import {formatTime} from '@/utils/format.js'
+import { ElMessage } from 'element-plus';
 // 声明变量
 const userstore = useUserStore()
 const chatList = ref([])
@@ -46,13 +47,14 @@ const getFriendChatMsg = async () => {
   });
 }
 // 发送信息
-const sendMsg = (msgList) => {
+const sendMsg = async (msgList) => {
   if(!chatList.value){
       chatList.value = []
     }
   chatList.value.push(msgList);
   console.log(msgList);
-
+  await saveChatMsg(msgList)
+  ElMessage.success("发送成功");
   scrollBottom();
 }
 //获取窗口高度并滚动至最底层
@@ -74,7 +76,6 @@ const mycontent = async () => {
     name: userInfo.username,
     uid: userInfo.userid,
     time: formatTime(new Date()),
-
   }
 }
 // 关闭标签页

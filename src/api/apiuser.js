@@ -52,3 +52,11 @@ export const searchfriends = params => {
       data: params
     }).then(res => res.data)
 }
+// 修改update 时间。 
+export const updatefriend = (params)=>{
+    return axios({
+        method: 'post',
+        baseURL: `${baseUrl}/api/updatefriend`,
+        data: params
+    }).then(res => res.data)    
+}

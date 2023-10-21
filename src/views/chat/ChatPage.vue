@@ -21,6 +21,8 @@ import avatar from '@/assets/img/head_portrait4.jpg'
 import { useRouter } from 'vue-router'
 // 还缺少一个请求函数
 import { getFriend } from '@/api/getData'
+// 这是保存用户信息列表的
+import {  updatefriend  } from '@/api/apiuser.js'
 import  PersonCart  from '@/components/PersonCart.vue'
 import chatwindow from './components/chatwindow.vue'
 import { useUserStore } from  '@/stores'
@@ -85,6 +87,10 @@ const Fullexpend = () => {
 }
 // TODO, 记得退出的时候要记录当前的数组顺寻
 const personCardSort = (id)=>{
+    const ids = {
+        id: id
+    }
+    updatefriend(ids)
     if(id !== personList.value[0].id){
         let nowPersonInfo = {}
         let isSort = false
@@ -122,6 +128,7 @@ onMounted(async () => {
         id: user.userid
     }
     personList.value = await getFriend(id)
+    if(!personList.value) personList.value = []
     for(let i = 0; i < personList.value.length; i++){
             if(personList.value[i].status === true){
                 nums++
@@ -138,7 +145,7 @@ onMounted(async () => {
         onperson.value = nums
         nums = 0
     },10000)
-
+    console.log(user);
     avatarUrl.value = user.userimg
 })
 </script>

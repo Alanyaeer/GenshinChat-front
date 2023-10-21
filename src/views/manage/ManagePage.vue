@@ -21,13 +21,14 @@ import Dialog from '@/components/Dialog.vue'
 // import HeadCard from "../components/HeadCard.vue";
 import { ref , watch, onMounted, defineProps, defineExpose, defineEmits} from 'vue'
 import {getFriend} from '@/api/getData.js'
+
 import PersonCart from '@/components/PersonCart.vue'
 import { useRoute } from 'vue-router';
 // import {useUser}
 import {useUserStore} from '@/stores'
-import { deletefriend , addfriend, saveuserInfo,searchfriends} from '../../api/apiuser'
+import { deletefriend , addfriend, saveuserInfo,searchfriends,updatefriend} from '../../api/apiuser'
 import PersonTalk from '@/components/PersonTalk.vue'
-import { ElMessage, checkboxGroupEmits } from 'element-plus'
+import { ElMessage, checkboxGroupEmits, createModelToggleComposable } from 'element-plus'
 import { getChatMsg } from '../../api/getData'
 const props = defineProps({
   come: {
@@ -58,7 +59,7 @@ const textshow = ref('确认')
 const userStore = useUserStore()
 const userimmg = ref('')
 const Messagelist = ref([])
-const allpersonlist = ref([])
+const allpersonlist = ref('')
 const msgCurrent  = ref('')
 const firstin = (id)=>{
 
@@ -166,17 +167,9 @@ const searchfriend = async ()=>{
     ElMessage('请输入搜索内容')
   }
   else{
-    console.log(nowvalue.value);
+    // 这里时查询全局的好友， 但是可能出现了问题？
     if(nowvalue.value === 2){
-      const user = await userStore.getUser()
-      let useridsss = {
-        id: user.userid
-      }
-      allpersonlist.value = await searchfriends(useridsss)
-      console.log(allpersonlist.value);
-      // console.log(personlist.value);
       let isfind = false
-      // console.log(object);
       for(let i = 0; i < allpersonlist.value.length; ++i){
         if(allpersonlist.value[i].id === searchvalue.value){
           username.value= allpersonlist.value[i].name
@@ -206,14 +199,13 @@ const searchfriend = async ()=>{
       myId: userInfo.userid,
       msg: searchvalue_string
     }
-    console.log(params);
-    console.log(await getChatMsg(params));
     Messagelist.value = await getChatMsg(params)
-    console.log('hello');
+    ElMessage.success("查找成功")
     // getChatMsg
   }
   else {
     let id = searchvalue.value.trim()
+    
     if(id !== personlist.value[0].id){
         let nowPersonInfo = {}
         let isSort = false
@@ -259,14 +251,20 @@ const save = async ()=>{
   }
   // console.log(params);
   if(nowvalue.value === 1){
-    userStore.setUser(params)
+    obj = await userStore.setUser(params)
+    if(obj.code === 1){
+      ElMessage.success('保存成功')
+    }
   }
   // if()
   else if(nowvalue.value === 2){
     let ids = {
       id: searchvalue.value
     }
-    await addfriend(ids)
+    const obj  = await addfriend(ids)
+    if(obj.data === 1){
+      ElMessage.success('添加好友成功')
+    }
   }
 }
 const getuserInfo = async ()=>{
@@ -292,7 +290,8 @@ const closeinner = async (id)=>{
           personlist.value.splice(i,1)
         }
       }
-      await deletefriend(ids)
+      const obj = await deletefriend(ids)
+      if(obj.data === 1)
       ElMessage.success('删除成功')
     }
     else{
@@ -323,6 +322,10 @@ watch(
 )
 
 onMounted(async ()=>{
+  allpersonlist.value = await searchfriends()
+  setInterval(async ()=>{
+    allpersonlist.value = await searchfriends()
+  }, 30000)
   const user = await userStore.getUser()
   let useridsss = {
     id: user.userid
@@ -439,7 +442,7 @@ onMounted(async ()=>{
 
             <div  class="bottom-down">
             <Transition>
-              <div v-if="nowvalue === 3 || nowvalue === 2" class="search-box">
+              <div v-if="nowvalue === 3 || nowvalue === 2 || nowvalue===4" class="search-box">
                   <input class="search-txt" type="text" v-model="searchvalue" placeholder="请输入userid 或者 聊天记录" />
                   <a class="search-btn">
                       <i class="fas fa-search"><el-icon @click="searchfriend" :size="20"><Search /></el-icon></i>

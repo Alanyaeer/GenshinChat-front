@@ -2,7 +2,7 @@ import base from './index'
 let axios = base.axios
 let baseUrl = base.baseUrl
 
-// 获取好友
+// 获取好友, 按照时间更新顺序返回数据 
 export const getFriend = (params) => {
     return axios({
       method: 'post',
@@ -19,3 +19,11 @@ export const getChatMsg = (params) => {
     data: params
   }).then(res => res.data)
 }
+export const saveChatMsg = (params)=>{
+  return axios({
+    method: 'post',
+    baseURL: `${baseUrl}/friend/saveMsg`,
+    data:  params
+  }).then(res=>res.data)
+}
+

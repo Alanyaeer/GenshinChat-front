@@ -22,6 +22,12 @@ axios.interceptors.request.use(
 );
 
 axios.interceptors.response.use(function (response) {
+  // ElMessage.error(response.msg)
+  // return Promise.reject(response)
+  if(response.code && response.code === 0){
+    ElMessage.error(response.msg)
+    return Promise.reject(response)
+  }
   // Do something with response data
   return response
 }, function (error) {
