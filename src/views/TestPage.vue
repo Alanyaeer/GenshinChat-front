@@ -1,32 +1,33 @@
 <script setup>
 import {ref } from 'vue'
 import {
+HelpFilled,
     Sunrise
 } from '@element-plus/icons-vue'
 // import { ManagePage} from './manage/ManagePage.vue'
-import ManagePage from './manage/ManagePage.vue'
+
+const change = ()=>{
+   let tt = document.getElementsByClassName("bg")[0].style
+//    tt.background = "url('src/assets/login_bg5.png') no-repeat center / cover"
+}
 </script>
 <template>
     <div class="bg">
-        <img class="avatar" src="@/assets/img/head_portrait5.jpg">
+
     </div>
+
 </template>
 
 <style>
     .bg{
         /* background-color: rgb(215, 175, 175); */
-        background-color: rgb(217, 209, 209);
+        /* background-color: rgb(217, 209, 209); */
         height: 100vh;
         width : 100vw;
-        .avatar{
-            position: relative;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%,-50%);
-            box-shadow: 18px 18px 30px rgba(0, 0,0,0.2),
-                        -18px  -18px 30px rgba(255, 255, 255, 1);
-
-        }
+        /* background-color: ; */
+        /* background: url("@/assets/login_bg2.jpg") no-repeat center / cover; */
+        
+        /* background:  url('@/assets/login_bg2.jpg') no-repeat center / cover;  */
     }
 
 </style>

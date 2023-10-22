@@ -41,12 +41,15 @@ const router = createRouter({
 })
 router.beforeEach((to, from, next) =>{
   if(to.matched.length === 0){
-    next('/404')
+    next({path: "404"})
   }
-  else{
+  else {
+    const userStore = useUserStore()
+    if(to.path !== '/login' && userStore.userid === ''){
+      next({path: "login"})
+    }
     next()
   }
-  const useStore = useUserStore()
-  if(useStore.token === '' && to.path !== '/login')return '/login'
+
 })
 export default router

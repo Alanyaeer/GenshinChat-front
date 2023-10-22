@@ -4,7 +4,7 @@
     const props = defineProps({
         imgUrl:{
             required: true,
-            default:new URL('@/assets/head_portrait.jpg', import.meta.url).href
+            // default:new URL('@/assets/head_portrait.jpg', import.meta.url).href
         },
         status:{
             required: true,

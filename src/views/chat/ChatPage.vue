@@ -120,9 +120,7 @@ const manage = (id) => {
     isshowDialog.value = true
 }
 onMounted(async () => {
-
     var nums = 0
-
     const user = await userStore.getUser()
     let id = {
         id: user.userid

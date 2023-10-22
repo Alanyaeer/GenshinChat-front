@@ -18,7 +18,6 @@ import {
 } from '@element-plus/icons-vue'
 import HeadCard from '@/components/HeadCard.vue'
 import Dialog from '@/components/Dialog.vue'
-// import HeadCard from "../components/HeadCard.vue";
 import { ref , watch, onMounted, defineProps, defineExpose, defineEmits} from 'vue'
 import {getFriend} from '@/api/getData.js'
 
@@ -26,10 +25,10 @@ import PersonCart from '@/components/PersonCart.vue'
 import { useRoute } from 'vue-router';
 // import {useUser}
 import {useUserStore} from '@/stores'
-import { deletefriend , addfriend, saveuserInfo,searchfriends,updatefriend} from '../../api/apiuser'
+import { deletefriend , addfriend, searchfriends,  updatefriend } from '@/api/apiuser'
 import PersonTalk from '@/components/PersonTalk.vue'
 import { ElMessage, checkboxGroupEmits, createModelToggleComposable } from 'element-plus'
-import { getChatMsg } from '../../api/getData'
+import { getChatMsg } from '@/api/getData'
 const props = defineProps({
   come: {
     type: Number,
@@ -184,7 +183,7 @@ const searchfriend = async ()=>{
         username.value = ''
         userdetail.value = ''
         userid.value = ''
-        userimg.value = 'src/assets/img/genshinchat.png'  
+        userimg.value = '@/assets/img/genshinchat.png'  
       }
       
   }
@@ -322,23 +321,27 @@ watch(
 )
 
 onMounted(async ()=>{
-  allpersonlist.value = await searchfriends()
-  setInterval(async ()=>{
-    allpersonlist.value = await searchfriends()
-  }, 30000)
+
   const user = await userStore.getUser()
   let useridsss = {
     id: user.userid
   }
-  personlist.value = await getFriend(useridsss)
   const id = props.come
+  textshow.value = 0
+  nowvalue.value = id
+  personlist.value = await getFriend(useridsss)
+
+  // 获取所有的用户
+  allpersonlist.value = await searchfriends()
+  setInterval(async ()=>{
+    allpersonlist.value = await searchfriends()
+  }, 30000)
   if(id !== 1)emptyuser()
   else {
     getuserInfo()
     console.log(userid.value)
   }
-  textshow.value = 0
-  nowvalue.value = id
+
   textshowfuntion(id)
   // userimg.value = 'src/assets/img/head_portrait.jpg'
   let underline = document.getElementsByClassName('underline')[0].style
@@ -433,10 +436,8 @@ onMounted(async ()=>{
                     position: relative;
                     padding-left: 65%;
                     padding-top: 25%;
-                    height: 70%;
-                    /* width: 100%; */
-                    /* border-radius: 15px; */
-                  " src="src/assets/img/genshinchat.png">
+                    height: 70%;" 
+                    src="@/assets/img/genshinchat.png">
                 </div>
             </div>  
 
