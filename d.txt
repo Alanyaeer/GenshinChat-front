@@ -10,10 +10,7 @@ import { VideoCamera,Phone, Document, PictureRounded } from '@element-plus/icons
 import { useUserStore } from '@/stores';
 import {formatTime} from '@/utils/format.js'
 import { ElMessage, uploadBaseProps } from 'element-plus';
-import {upload, downloadbasecontent, downloadfile} from '@/api/common.js'
-import axios from 'axios'
-import base from '../../../api/index'
-const baseUrl = base.baseUrl
+import {reserve, downloadbasecontent} from '@/api/common.js'
 // 声明变量
 const userstore = useUserStore()
 const chatList = ref([])
@@ -37,7 +34,6 @@ const emit = defineEmits(['personCardSort'])
 const getFriendChatMsg = async () => {
   let params = {
     friendId: props.friendInfo.id,
-    myId: userstore.userid
   };
   console.log(params);
   await getChatMsg(params).then((res) => {
@@ -45,33 +41,11 @@ const getFriendChatMsg = async () => {
     if(!chatList.value){
       chatList.value = []
     }
-      chatList.value.forEach(async (item) => {
-        if (item.chatType == 2 || (item.chatType == 1 && item.imgType == 2)) {
-          axios.get(baseUrl + "/api/downloadfile", {
-            params: {
-              fileName: item.fileName,
-              extend: item.extend
-            },
-            responseType: "arraybuffer"
-          })
-          .then(res=>new Blob([res], {type: item.extend}))
-          .then(blob=> new File([blob], item.fileName))
-          .then(file=>{
-            item.msg = file
-            console.log(file);
-            let reader = new FileReader()
-            let fileNameTemp = item.fileName
-            reader.onloadend = (es)=>{
-                item.msg = es.target.result
-                item.fileName = fileNameTemp
-                console.log(item.msg)
+      chatList.value.forEach((item) => {
+        if (item.chatType == 2 || (item.chatType == 1 && item.extend.imgType == 2)) {
 
-                if(item.chatType === 1){
-                  srcImgList.value.push(item.msg)
-                }
-            }
-            reader.readAsDataURL(file)
-          })
+          item.msg = downloadbasecontent(item)
+          srcImgList.value.push(item.msg);
         }
       });
       scrollBottom();
@@ -121,14 +95,12 @@ const sendText = async () => {
       ...curobj,
       msg: inputMsg.value,
       chatType: 0, //信息类型，0文字，1图片
-      myId: userstore.userid,
-      friendId: props.friendInfo.id
     };
     sendMsg(chatMsg);
-    
+
     // 发送给父组件的消息
     emit('personCardSort',props.friendInfo.id)
-    upload(chatMsg)
+    reserve(chatMsg)
     inputMsg.value = "";
   } else {
     ElMessage.warning("消息不能为空")
@@ -141,13 +113,13 @@ const sendEmoji = async (msg) => {
       ...curobj,
       msg: msg,
       chatType: 1, //信息类型，0文字，1图片
-      imgType: 1, //(1表情，2本地图片)
-      myId: userstore.userid,
-      friendId: props.friendInfo.id
+      extend: {
+        imgType: 1, //(1表情，2本地图片)
+      },
     };
     sendMsg(chatEmoji);
     clickEmoji();
-    upload(chatEmoji)
+    reserve(chatEmoji)
 }
 // 发送本地图片
 const sendImg = async (e) => {
@@ -157,13 +129,12 @@ const sendImg = async (e) => {
   let chatfiles = {
     msg: "",
     chatType: 1, //信息类型，0文字，1图片, 2文件
-
+    extend: {
       imgType: 2, //(1表情，2本地图片)
+    },
     ...curobj,
     size: "",
-    fileName: "",
-    myId: userstore.userid,
-    friendId: props.friendInfo.id
+    filename: ""
   };
 
   let files = e.target.files[0];
@@ -177,7 +148,8 @@ const sendImg = async (e) => {
   let reader = new FileReader();
   reader.readAsDataURL(files);
   reader.onloadend = (es) => {
-    // let filename = upload(chatfiles.msg)
+    // let filename = reserve(chatfiles.msg)
+    console.log(reader.result);
     chatfiles.msg = es.target.result; 
     srcImgList.value.push(chatfiles.msg);
     sendMsg(chatfiles);
@@ -187,7 +159,7 @@ const sendImg = async (e) => {
         
       // }
       //这里可能存在问题但是以后在处理
-    upload(chatfiles)
+    reserve(chatfiles)
   };
   e.target.files = null;
 }
@@ -208,14 +180,12 @@ const sendFile = async (e) => {
   let chatFile = {
     msg: "",
     chatType: 2, //信息类型，0文字，1图片, 2文件
-
+    extend: {
       fileType: "", //(1word，2excel，3ppt，4pdf，5zpi, 6txt)
-
+    },
     ...curobj,
     size: "",
-    fileName: "",
-    myId: userstore.userid,
-    friendId: props.friendInfo.id
+    filename: ""
   };
   let files = e.target.files[0]; //图片文件名
   console.log(files);
@@ -230,41 +200,46 @@ const sendFile = async (e) => {
     switch (files.type) {
       case "application/msword":
       case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        chatFile.fileType = 1;
+        chatFile.extend.fileType = 1;
         break;
       case "application/vnd.ms-excel":
       case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-        chatFile.fileType = 2;
+        chatFile.extend.fileType = 2;
         break;
       case "application/vnd.ms-powerpoint":
       case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
-        chatFile.fileType = 3;
+        chatFile.extend.fileType = 3;
         break;
       case "application/pdf":
-        chatFile.fileType = 4;
+        chatFile.extend.fileType = 4;
         break;
       case "application/zip":
       case "application/x-zip-compressed":
-        chatFile.fileType = 5;
+        chatFile.extend.fileType = 5;
         break;
       case "text/plain":
-        chatFile.fileType = 6;
+        chatFile.extend.fileType = 6;
         break;
       default:
-        chatFile.fileType = 0;
+        chatFile.extend.fileType = 0;
     }
     sendMsg(chatFile);
     chatFile.size = filesize.value
     filenametemp = files.name
+
     let reader = new FileReader()
+      reader.readAsDataURL(files)
       reader.onload = (es) => {
       chatFile.msg = es.target.result
-      chatFile.fileName = filenametemp
+      chatFile.filename = filenametemp
       // 这里就是在进行前端上传给后台，后台把数据转换为文件放入到文件夹里面
-      upload(chatFile)
+      reserve(chatFile)
+      // // 深拷贝
+      // let chatFilenew = Object.assign({}, chatFile)
+      // // 让文件记录在数据库中 ， 但是文件名字，进行了变动。
+      // chatFilenew.filename = file_reserve_name
+      // saveChatMsg(chatFilenew)
     }
-    reader.readAsDataURL(files)
-
      e.target.files = null;
 
   }
@@ -280,8 +255,9 @@ const video = () => {
 // 文件点击后下载
 const clickfile = (item)=>{
   const a = document.createElement('a')
-  a.download = item.fileName
+  a.download = item.filename
   a.href = item.msg 
+  console.log(item);
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
@@ -353,7 +329,7 @@ watch(
               <img
                 :src="item.msg"
                 alt="表情"
-                v-if="item.imgType == 1"
+                v-if="item.extend.imgType == 1"
                 style="width: 100px; height: 100px"
               />
               <el-image :src="item.msg" :preview-src-list="srcImgList" v-else>
@@ -362,7 +338,7 @@ watch(
             <div class="chat-img" v-if="item.chatType == 2">
               <div class="word-file">
                 <FileCard
-                  :fileType="item.fileType"
+                  :fileType="item.extend.fileType"
                   :file="item.msg"
       
                 ></FileCard>
@@ -384,7 +360,7 @@ watch(
               <img
                 :src="item.msg"
                 alt="表情"
-                v-if="item.imgType == 1"
+                v-if="item.extend.imgType == 1"
                 style="width: 100px; height: 100px"
               />
               <el-image
@@ -399,8 +375,8 @@ watch(
               <div class="word-file">
                 <FileCard
                   id="filecards"
-                  :fileType="item.fileType"
-                  :fileName="item.fileName"
+                  :fileType="item.extend.fileType"
+                  :file="item.msg"
                   :size="item.size"
                   @click="clickfile(item)"
                 ></FileCard>

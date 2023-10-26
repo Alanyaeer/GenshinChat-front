@@ -27,11 +27,18 @@ export const useUserStore = defineStore(
       await getuserInfo(params).then((res)=>{
         userInfo = res
       })
-      console.log(userInfo);
+      console.log(userInfo)
+      if(userInfo.userimg === '')userInfo.userimg = new URL("@/assets/img/genshinchat.png", import.meta.url).href
       return userInfo
     }
     const setUser = async (obj)=>{
       obj = await saveuserInfo(obj)
+      console.log("保存用户信息");
+      // console.log();
+      console.log(obj);
+      if(obj === 1){
+        ElMessage.success('保存成功')
+      }
       getUser()
       return obj
     }

@@ -7,6 +7,9 @@
         },
         nowvalue: {
             type: Number
+        },
+        pcCurrent: {
+            type: String
         }
     })
     const emit = defineEmits(['closeinner'])
@@ -17,6 +20,7 @@
     onMounted(()=>{
         if(props.nowvalue === 3)message.value = '你确认要删除：'
         else message.value = '你确认要跳转到聊天记录'
+        console.log(props.pcCurrent);
     })
 </script>
 <template>

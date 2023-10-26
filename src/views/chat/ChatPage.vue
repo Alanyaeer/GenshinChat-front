@@ -52,7 +52,11 @@ const direction = ref(false)
 // avatarUrl.value = require.resolve('@/assets/images/avatar_default.png')
 
 const logout = () => {
+    const ids = {
+        id: userStore.userid.value
+    }
     userStore.removeId()
+
     router.push('/login')
 }
 const clickPerson = (info) => {
@@ -111,7 +115,12 @@ const personCardSort = (id)=>{
         }
     }
 }
-const closeDialog = () => {
+const closeDialog = async() => {
+    const user = await userStore.getUser()
+    let id = {
+        id: user.userid
+    }
+    personList.value = await getFriend(id)
     isshowDialog.value = false
 }
 // 增添好友触发
@@ -135,11 +144,15 @@ onMounted(async () => {
     onperson.value = nums
     nums = 0
     setInterval(()=>{
+        if(!userStore){
+            clearInterval()
+        }
         for(let i = 0; i < personList.value.length; i++){
             if(personList.value[i].status === true){
                 nums++
             }
         }
+        
         onperson.value = nums
         nums = 0
     },10000)

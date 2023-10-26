@@ -9,7 +9,7 @@
     <img src="@/assets/img/fileImg/txt.png" alt="" v-else/>
     <div class="word">
       <span
-        >{{file.name || '未知'}}</span
+        >{{fileName || '未知'}}</span
       >
       <!-- <span>154kb</span> -->
     </div>
@@ -21,19 +21,16 @@ export default {
   // props: ["fileType", "file"],
   props: {
     fileType: Number,
-    file: File,
+    fileName: String,
     default() {
       return {};
     },
   },
   watch: {
     file() {
-      console.log(this.file);
     },
   },  
   mounted() {
-    console.log(this.file);
-    console.log(this.fileType);
   }
 };
 </script>

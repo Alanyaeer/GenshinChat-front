@@ -14,11 +14,12 @@ import {
   Sunrise,
   MoonNight,
   FullScreen,
-  CloseBold 
+  CloseBold, 
+LocationFilled
 } from '@element-plus/icons-vue'
 import HeadCard from '@/components/HeadCard.vue'
 import Dialog from '@/components/Dialog.vue'
-import { ref , watch, onMounted, defineProps, defineExpose, defineEmits} from 'vue'
+import { ref , watch, onMounted, defineProps, defineExpose, defineEmits, useSSRContext} from 'vue'
 import {getFriend} from '@/api/getData.js'
 
 import PersonCart from '@/components/PersonCart.vue'
@@ -27,8 +28,8 @@ import { useRoute } from 'vue-router';
 import {useUserStore} from '@/stores'
 import { deletefriend , addfriend, searchfriends,  updatefriend } from '@/api/apiuser'
 import PersonTalk from '@/components/PersonTalk.vue'
-import { ElMessage, checkboxGroupEmits, createModelToggleComposable } from 'element-plus'
 import { getChatMsg } from '@/api/getData'
+let myid = ''
 const props = defineProps({
   come: {
     type: Number,
@@ -47,6 +48,7 @@ const before = ref('1')
 const switchvalue = ref(false)
 const nowvalue = ref('')
 const userid = ref('')
+const myuserid = ref('')
 // const 
 const username = ref('')
 const userdetail = ref('')
@@ -59,6 +61,7 @@ const userStore = useUserStore()
 const userimmg = ref('')
 const Messagelist = ref([])
 const allpersonlist = ref('')
+const newclickpersonid = ref('')
 const msgCurrent  = ref('')
 const firstin = (id)=>{
 
@@ -67,6 +70,7 @@ const firstin = (id)=>{
     change(id)
   }, 300)
 }
+
 // tab交换时刻
 const emptyuser = ()=>{
   userimg.value = new URL("@/assets/img/genshinchat.png", import.meta.url).href,  
@@ -74,18 +78,20 @@ const emptyuser = ()=>{
   userdetail.value = ''
   userid.value = ''
 }
-const change = (id)=>{
+const change = async (id)=>{
   if(id === 1){
-    getuserInfo()
+    let userInfo = await userStore.getUser()
+    userid.value = userInfo.userid
+    myid = userid.value
+    username.value = userInfo.username
+    userimg.value = userInfo.userimg
+    userdetail.value = userInfo.userdetail
   }
   else{
     emptyuser()
   }
   nowvalue.value = id
 
-  if(userimg.value.trim() === '')
-
-  console.log(nowvalue.value);
   let underline = document.getElementsByClassName('underline')[0].style
   let iconselect = document.getElementsByClassName('icon_style')[id - 1].style
   let iconselectb = document.getElementsByClassName('icon_style')[before.value - 1].style
@@ -98,7 +104,6 @@ const change = (id)=>{
   iconselect.filter = "drop-shadow(0 0 10px #fff) drop-shadow(0 0 20px #fff)"
   before.value = id
   textshowfuntion(id)
-
 }
 const textshowfuntion = (id)=>{
   if(id === 1){
@@ -137,14 +142,6 @@ const uiswitch = ()=>{
     iconstyle.color= '#000'
   } 
 }
-const firstins = (id) => {
-  // console.log(id);
-  setTimeout(()=>{
-    let underline = document.getElementsByClassName('underline')[0].style
-    underline.left = (id - 1) * 19.2 + "%"
-  }, 500)
-
-}
 const close = () => {
   emits('closeDialog')
 }
@@ -168,6 +165,9 @@ const searchfriend = async ()=>{
   else{
     // 这里时查询全局的好友， 但是可能出现了问题？
     if(nowvalue.value === 2){
+      if(userimg.value ===  ''){
+        userimg.value =  new URL("@/assets/img/genshinchat.png", import.meta.url).href
+      }
       let isfind = false
       for(let i = 0; i < allpersonlist.value.length; ++i){
         if(allpersonlist.value[i].id === searchvalue.value){
@@ -178,17 +178,18 @@ const searchfriend = async ()=>{
           isfind = true
         }
       }
+
       if(isfind === false) {
         ElMessage.warning('未能找到该用户')
         username.value = ''
         userdetail.value = ''
         userid.value = ''
-        userimg.value = '@/assets/img/genshinchat.png'  
+        userimg.value =  new URL("@/assets/img/genshinchat.png", import.meta.url).href
       }
       
   }
   // nowvalue为4的时候， 也就是搜索聊天记录
-  else if(nowvalue.value ===4){
+  else if(nowvalue.value === 4){
     let searchvalue_string = searchvalue.value.trim()
       // let searchvalue_obj = JSON.parse(searchvalue_string)
     let userInfo = await userStore.getUser()
@@ -250,18 +251,27 @@ const save = async ()=>{
   }
   // console.log(params);
   if(nowvalue.value === 1){
-    obj = await userStore.setUser(params)
-    if(obj.code === 1){
-      ElMessage.success('保存成功')
-    }
+    await userStore.setUser(params)
+
   }
   // if()
   else if(nowvalue.value === 2){
+    let searchvaluetemp = userid.value
+    let ttt = myid
+    console.log(searchvaluetemp);
+    console.log(ttt);
     let ids = {
-      id: searchvalue.value
+      id: ttt,
+      friendId: searchvaluetemp
     }
-    const obj  = await addfriend(ids)
-    if(obj.data === 1){
+    console.log(ids);
+    await addfriend(ids)
+    let fids = {
+      id: searchvaluetemp,
+      friendId: ttt
+    }
+    const obj  = await addfriend(fids)
+    if(obj=== 1){
       ElMessage.success('添加好友成功')
     }
   }
@@ -281,16 +291,24 @@ const closeinner = async (id)=>{
   showDialog.value = false
   if(id === 1){
     const ids = {
-      id : id
+      id: myid,
+      friendId : pcCurrent.value
     }
+    const idfriend = {
+      friendId: myid,
+      id: pcCurrent.value
+    }
+    console.log(ids);
     if(nowvalue.value === 3){
       for(let i = 0; i < personlist.value.length; i++){
         if(personlist.value[i].id === pcCurrent.value){
           personlist.value.splice(i,1)
         }
       }
+      await deletefriend(idfriend)
       const obj = await deletefriend(ids)
-      if(obj.data === 1)
+
+      if(obj === 1)
       ElMessage.success('删除成功')
     }
     else{
@@ -326,23 +344,31 @@ onMounted(async ()=>{
   let useridsss = {
     id: user.userid
   }
+  userid.value = user.userid
+  myid = userid.value
+  userimg.value = new URL("@/assets/img/genshinchat.png", import.meta.url).href 
   const id = props.come
   textshow.value = 0
   nowvalue.value = id
-  personlist.value = await getFriend(useridsss)
 
+  personlist.value = await getFriend(useridsss)
   // 获取所有的用户
   allpersonlist.value = await searchfriends()
   setInterval(async ()=>{
-    allpersonlist.value = await searchfriends()
-  }, 30000)
+    if(!userStore){
+      clearInterval()
+    }
+    else{
+      allpersonlist.value = await searchfriends()
+    }
+  }, 10000)
   if(id !== 1)emptyuser()
   else {
     getuserInfo()
-    console.log(userid.value)
   }
 
   textshowfuntion(id)
+  
   // userimg.value = 'src/assets/img/head_portrait.jpg'
   let underline = document.getElementsByClassName('underline')[0].style
   underline.left = (id - 1) * 19.2 + "%"
@@ -358,6 +384,7 @@ onMounted(async ()=>{
         v-if="showDialog"
         :nowvalue = "nowvalue"
         :userinnername="userinnername"
+        :pcCurrent = "pcCurrent"
         @closeinner="closeinner"
       ></Dialog>
         <div element element-loading-text="加载中..." v-loading="loadingv" class="content">
