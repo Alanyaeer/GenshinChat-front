@@ -255,6 +255,7 @@ const sendFile = async (e) => {
     }
     sendMsg(chatFile);
     chatFile.size = filesize.value
+    chatFile.fileName = files.name
     filenametemp = files.name
     let reader = new FileReader()
       reader.onload = (es) => {
