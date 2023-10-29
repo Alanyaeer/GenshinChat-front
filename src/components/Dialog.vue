@@ -58,7 +58,6 @@
         transform: translate(-50%, -50%);
         display: flex;
         flex-direction: column;
-         box-shadow: 0, 0, 10px, 0, #87762d;
         // margin: 1%;
         .top{
             position: relative;

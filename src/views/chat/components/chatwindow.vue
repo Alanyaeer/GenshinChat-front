@@ -189,7 +189,7 @@ const sendImg = async (e) => {
   };
 
   let files = e.target.files[0];
-  if(files.size>1024*1024*10){
+  if(files.size>1024*1024*2){
     ElMessage.error("文件过大，请重新选择");
     return ;
   }
@@ -239,7 +239,7 @@ const sendFile = async (e) => {
   };
   let files = e.target.files[0]; //图片文件名
   console.log(files);
-  if(files.size>1024*1024*10){
+  if(files.size>1024*1024*2){
     ElMessage.error("文件过大，请重新选择");
     return ;
   }
@@ -365,7 +365,10 @@ const init = ()=>{
               }
               reader.readAsDataURL(file)
             }).then(()=>{
-              sendMsg(cur)
+              setTimeout(()=>{
+                sendMsg(cur)
+
+              }, 500)
             })
           }
           else sendMsg(cur)          

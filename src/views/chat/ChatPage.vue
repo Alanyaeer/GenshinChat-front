@@ -144,7 +144,7 @@ onMounted(async () => {
     if(!personList.value) personList.value = []
     setInterval(async ()=>{
         personList.value = await getFriend(id)
-    },15000)
+    },5000)
     avatarUrl.value = user.userimg
 })
 </script>
