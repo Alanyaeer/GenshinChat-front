@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch} from 'vue'
+import { ref, onMounted, watch, computed} from 'vue'
 import {
   Document,
   Menu as IconMenu,
@@ -22,7 +22,7 @@ import { useRouter } from 'vue-router'
 // 还缺少一个请求函数
 import { getFriend } from '@/api/getData'
 // 这是保存用户信息列表的
-import {  updatefriend  } from '@/api/apiuser.js'
+import {  updatefriend ,logoutuser } from '@/api/apiuser.js'
 import  PersonCart  from '@/components/PersonCart.vue'
 import chatwindow from './components/chatwindow.vue'
 import { useUserStore } from  '@/stores'
@@ -49,11 +49,14 @@ const onperson = ref(0)
 // 判断消息的来源
 const direction = ref(false)
 
-// avatarUrl.value = require.resolve('@/assets/images/avatar_default.png')
 
-const logout = () => {
+const logout = async () => {
     const ids = {
-        id: userStore.userid.value
+        id: userStore.userid
+    }
+    const id = await logoutuser(ids)
+    if(id === 1){
+        ElMessage.success('退出登录')
     }
     userStore.removeId()
 
@@ -128,35 +131,20 @@ const manage = (id) => {
     typeDialog.value = id
     isshowDialog.value = true
 }
+// onperson.value = 
+const onlineperson = computed(()=>{
+    return personList.value.filter((person)=>(person.status === true)).length
+})
 onMounted(async () => {
-    var nums = 0
     const user = await userStore.getUser()
     let id = {
         id: user.userid
     }
     personList.value = await getFriend(id)
     if(!personList.value) personList.value = []
-    for(let i = 0; i < personList.value.length; i++){
-            if(personList.value[i].status === true){
-                nums++
-            }
-        }
-    onperson.value = nums
-    nums = 0
-    setInterval(()=>{
-        if(!userStore){
-            clearInterval()
-        }
-        for(let i = 0; i < personList.value.length; i++){
-            if(personList.value[i].status === true){
-                nums++
-            }
-        }
-        
-        onperson.value = nums
-        nums = 0
-    },10000)
-    console.log(user);
+    setInterval(async ()=>{
+        personList.value = await getFriend(id)
+    },15000)
     avatarUrl.value = user.userimg
 })
 </script>
@@ -226,7 +214,7 @@ onMounted(async () => {
             <h1 class="title">GenshinChat</h1>
             <div class="online-person">
                 <span class="onlin-text">聊天列表</span>
-                <span  style="padding-left: 100px; color: rgb(176, 178, 189)">{{ onperson }} / {{ personList.length}}</span>
+                <span  style="padding-left: 100px; color: rgb(176, 178, 189)">{{ onlineperson }} / {{ personList.length}}</span>
                 <!-- <Transition> -->
                     <div class="person-cards-wrapper">
                     <div

@@ -60,10 +60,10 @@ export const updatefriend = (params)=>{
         data: params
     }).then(res => res.data)    
 }
-export const logout = params => {
+export const logoutuser = params => {
     return axios({
-        methods: 'post',
-        baseURL: `${baseUrl}/api/updatefriend`,
-        data: params
+      method: 'post',
+      baseURL: `${baseUrl}/api/logout`,
+      data: params
     }).then(res => res.data)
 }

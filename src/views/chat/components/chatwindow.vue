@@ -4,7 +4,7 @@ import { getChatMsg } from "../../../api/getData.js";
 import HeadPortrait from "../../../components/HeadPortrait.vue";
 import Emoji from "../../../components/Emoji.vue";
 import FileCard from "../../../components/FileCard.vue";
-import { ref, onMounted, watch ,defineProps, defineEmits, nextTick, getCurrentInstance} from 'vue'
+import { ref, onMounted, watch ,defineProps, defineEmits, nextTick, getCurrentInstance, initCustomFormatter} from 'vue'
 import { saveChatMsg} from '@/api/getData.js'
 import { VideoCamera,Phone, Document, PictureRounded } from '@element-plus/icons-vue';
 import { useUserStore } from '@/stores';
@@ -23,6 +23,7 @@ const srcImgList = ref([])
 const chatContent = ref(null)
 const filesize = ref('')
 let filenametemp = ""
+let socket;
 // const instance = getCurrentInstance()
 // 父组件传递过来的变量
 const props = defineProps({
@@ -81,7 +82,8 @@ const getFriendChatMsg = async () => {
 const sendMsg = async (msgList) => {
   if(!chatList.value){
       chatList.value = []
-    }
+  }
+
   chatList.value.push(msgList);
   console.log(msgList);
   // await saveChatMsg(msgList)
@@ -108,13 +110,31 @@ const mycontent = async () => {
     time: formatTime(new Date()),
   }
 }
+const sendSocket = (message)=>{
+  let chatuser = props.friendInfo.id
+  let myid = userstore.userid
+  if(chatuser == null){
+    console.log('选择聊天对象');
+    return 
+  }
+  if (typeof (WebSocket) == "undefined") {
+    console.log("您的浏览器不支持WebSocket");
+  } else {
+    console.log("您的浏览器支持WebSocket");
+  }
+  let sendmessage = {
+    from: myid,
+    to: chatuser,
+    text: message
+  }
+  socket.send(JSON.stringify(sendmessage))
+}
 // 关闭标签页
 const clickEmoji = () => {
   showEmoji.value = !showEmoji.value;
 }
 // 发送消息
 const sendText = async () => {
-  console.log(inputMsg.value);
   if (inputMsg.value) {
     let curobj = await mycontent();
     let chatMsg = {
@@ -130,6 +150,7 @@ const sendText = async () => {
     emit('personCardSort',props.friendInfo.id)
     upload(chatMsg)
     inputMsg.value = "";
+    sendSocket(chatMsg)
   } else {
     ElMessage.warning("消息不能为空")
   }
@@ -148,6 +169,7 @@ const sendEmoji = async (msg) => {
     sendMsg(chatEmoji);
     clickEmoji();
     upload(chatEmoji)
+    sendSocket(chatEmoji)
 }
 // 发送本地图片
 const sendImg = async (e) => {
@@ -182,12 +204,10 @@ const sendImg = async (e) => {
     srcImgList.value.push(chatfiles.msg);
     sendMsg(chatfiles);
 
-      // 这里就是在进行前端上传给后台，后台把数据转换为文件放入到文件夹里面
-      // let msgs = {
-        
-      // }
-      //这里可能存在问题但是以后在处理
     upload(chatfiles)
+    console.log(chatfiles);
+    sendSocket(chatfiles)
+
   };
   e.target.files = null;
 }
@@ -258,14 +278,18 @@ const sendFile = async (e) => {
     chatFile.fileName = files.name
     filenametemp = files.name
     let reader = new FileReader()
-      reader.onload = (es) => {
+    reader.readAsDataURL(files)    
+    reader.onload = (es) => {
       chatFile.msg = es.target.result
       chatFile.fileName = filenametemp
       // 这里就是在进行前端上传给后台，后台把数据转换为文件放入到文件夹里面
       upload(chatFile)
     }
-    reader.readAsDataURL(files)
+    // setTimeout(()=>{
+      console.log(chatFile);
+      sendSocket(chatFile)
 
+    // }, 1000)
      e.target.files = null;
 
   }
@@ -287,10 +311,79 @@ const clickfile = (item)=>{
   a.click()
   document.body.removeChild(a)
 }
+const init = ()=>{
+  let userId = userstore.userid
+  if(typeof (WebSocket) == "undefined"){
+    console.log("您的浏览器不支持WebSocket")
+  }
+  else{
+    let socketUrl = "ws://localhost:8080/imserver/" + userId
+    if(socket != null){
+      console.log(socket);
+
+      socket.close()
+      socket = null
+    }
+    socket = new WebSocket(socketUrl)
+    socket.onopen = function () {
+        console.log("websocket已打开");
+    };
+    socket.onmessage = function (msg) {
+      console.log("收到数据====" + msg.data)
+      let data = JSON.parse(msg.data)  // 对收到的json数据进行解析， 类似这样的： {"users": [{"username": "zhang"},{ "username": "admin"}]}
+      if (data.users) {  // 获取在线人员信息
+        // _this.users = data.users.filter(user => user.username !== username)  // 获取当前连接的所有用户信息，并且排除自身，自己不会出现在自己的聊天列表里
+        console.log('等待开发');
+      } else {
+        // 如果服务器端发送过来的json数据 不包含 users 这个key，那么发送过来的就是聊天文本json数据
+        //  // {"from": "zhang", "text": "hello"}
+        if (data.from === props.friendInfo.id) {
+          let cur = JSON.parse(data.text)
+          if(cur.chatType === 1 && cur.imgType === 2){
+            srcImgList.value.push(cur.msg)
+            sendMsg(cur)
+
+          }
+          // 如果接受到文件需要到数据库中下载
+          else if(cur.chatType === 2){
+            axios.get(baseUrl + "/api/downloadfile", {
+            params: {
+              fileName: cur.fileName,
+              extend: cur.extend
+            },
+            responseType: "arraybuffer"
+            })
+            .then(res=>new Blob([res], {type: cur.extend}))
+            .then(blob=> new File([blob], cur.fileName))
+            .then(file=>{
+              cur.msg = file
+              let reader = new FileReader()
+              let fileNameTemp = cur.fileName
+              reader.onloadend = (es)=>{
+                  cur.msg = es.target.result
+                  cur.fileName = fileNameTemp
+              }
+              reader.readAsDataURL(file)
+            }).then(()=>{
+              sendMsg(cur)
+            })
+          }
+          else sendMsg(cur)          
+        }
+      }
+    }
+    socket.onclose = function () {
+      console.log('websocket关闭')
+    }
+    socket.onerror = function () {
+      console.log('websocket发送错误');
+    }
+  }
+}
 onMounted(()=>{
   getFriendChatMsg()
+  init()
 })
-
 watch(
   () => props.friendInfo,
   () => {
@@ -357,7 +450,11 @@ watch(
                 v-if="item.imgType == 1"
                 style="width: 100px; height: 100px"
               />
-              <el-image :src="item.msg" :preview-src-list="srcImgList" v-else>
+              <el-image 
+                style="max-width: 300px; border-radius: 10px"
+                :src="item.msg"
+                :preview-src-list="srcImgList"
+              v-else>
               </el-image>
             </div>
             <div class="chat-img" v-if="item.chatType == 2">
@@ -365,7 +462,9 @@ watch(
                 <FileCard
                   :fileType="item.fileType"
                   :file="item.msg"
-      
+                  :fileName="item.fileName"
+                  :size="item.size"
+                  @click="clickfile(item)"
                 ></FileCard>
               </div>
             </div>

@@ -11,7 +11,7 @@
       <span
         >{{fileName || '未知'}}</span
       >
-      <!-- <span>154kb</span> -->
+      <span>{{size}}</span>
     </div>
   </div>
 </template>
@@ -22,6 +22,7 @@ export default {
   props: {
     fileType: Number,
     fileName: String,
+    size: String,
     default() {
       return {};
     },

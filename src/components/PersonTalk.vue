@@ -25,17 +25,16 @@ watch(
 <template>
   <div class="person-card" :class="{ activeCard: messageInfo.id == current }">
     <div class="info">
-          <HeadPortrait :imgUrl="messageInfo.headImg" :status = "messageInfo.status"></HeadPortrait>
+          <HeadPortrait :imgUrl="messageInfo.headImg" :status = "messageInfo.status" :needStatus="true"></HeadPortrait>
           <div class="info-detail">
-            <div class="name">{{ messageInfo.name }}</div>
-            <div class="detail">{{ messageInfo.detail }}</div>
+            <div class="name">{{ messageInfo.uid }}</div>
           </div>
     </div>
     <div class="message">
-      <span class="font">
+      <span class="font1">
         {{ messageInfo.time+ ':  ' }}
       </span>
-      <span class="font">
+      <span class="font2">
         {{ messageInfo.msg }}
       </span>
     </div>
@@ -45,7 +44,8 @@ watch(
 <style lang="scss" scoped>
 .person-card {
   width: 500px;
-  height: 150px;
+  min-height: 100px;
+  max-height: 400px;
   border-radius: 10px;
   background-color: rgb(50, 54, 68);
   position: relative;
@@ -64,7 +64,7 @@ watch(
     overflow: hidden;
     display: flex;
     .info-detail {
-      margin-top: 5px;
+      margin-top: 14px;
       margin-left: 20px;
       .name {
         color: #fff;
@@ -84,23 +84,38 @@ watch(
   }
   .message{
     background-color: #151414;
-    position:relative;
+    position: absolute;
     // width: 100%;
 
     // height: 100%;
     top: 50%;
-    left: 40%;
+    left: 45%;
     transform: translate(0, -50%);
     height: 80%;
     opacity: 0.8;
     width: 55%;
     display: flex;
-    .font{
-      padding-top: 20%;
-      position: relative;
+    .font1{
+      // padding-top: 20%;
+      top: 50%;
+      // left: 50%;
+      position: absolute;
       font-weight: bold;
-      padding-left: 10%;
+      // padding-left: 10%;
       color: white;
+      transform: translate(0, -50%);
+      // justify-content: center;
+
+    }
+    .font2{
+      // padding-top: 20%;
+      top: 50%;
+      left: 80%;
+      position: absolute;
+      font-weight: bold;
+      // padding-left: 10%;
+      color: white;
+      transform: translate(0, -50%);
       // justify-content: center;
 
     }

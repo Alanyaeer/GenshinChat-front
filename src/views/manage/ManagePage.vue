@@ -89,6 +89,15 @@ const change = async (id)=>{
   }
   else{
     emptyuser()
+
+  }
+  if(id === 3){
+    // personlist.value = await getFriend(userStore.userid)
+    const user = await userStore.getUser()
+    let id = {
+        id: user.userid
+    }
+    personlist.value = await getFriend(id)
   }
   nowvalue.value = id
 
@@ -165,6 +174,7 @@ const searchfriend = async ()=>{
   else{
     // 这里时查询全局的好友， 但是可能出现了问题？
     if(nowvalue.value === 2){
+      allpersonlist.value = await searchfriends()
       if(userimg.value ===  ''){
         userimg.value =  new URL("@/assets/img/genshinchat.png", import.meta.url).href
       }
@@ -265,13 +275,15 @@ const save = async ()=>{
       friendId: searchvaluetemp
     }
     console.log(ids);
-    await addfriend(ids)
+    const tempobj = await addfriend(ids)
     let fids = {
       id: searchvaluetemp,
       friendId: ttt
     }
-    const obj  = await addfriend(fids)
-    if(obj=== 1){
+    if(searchvaluetemp !== ttt){
+      const obj  = await addfriend(fids)
+    }
+    if(tempobj=== 1){
       ElMessage.success('添加好友成功')
     }
   }
@@ -354,21 +366,11 @@ onMounted(async ()=>{
   personlist.value = await getFriend(useridsss)
   // 获取所有的用户
   allpersonlist.value = await searchfriends()
-  setInterval(async ()=>{
-    if(!userStore){
-      clearInterval()
-    }
-    else{
-      allpersonlist.value = await searchfriends()
-    }
-  }, 10000)
   if(id !== 1)emptyuser()
   else {
     getuserInfo()
   }
-
   textshowfuntion(id)
-  
   // userimg.value = 'src/assets/img/head_portrait.jpg'
   let underline = document.getElementsByClassName('underline')[0].style
   underline.left = (id - 1) * 19.2 + "%"
