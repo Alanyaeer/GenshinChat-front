@@ -104,6 +104,34 @@
           vertical-align: middle;
       }
   }
+  @keyframes huxi_light {
+    0% {
+        box-shadow: 0px 0px 1px 1px rgb(144,225,80);
+    }
+    50% {
+        box-shadow: 0px 0px 3px 2px rgb(144,225,80);
+    }
+    100% {
+        box-shadow: 0px 0px 1px 1px rgb(144,225,80);
+    }
+    }
+    @keyframes huxi_dark {
+    0% {
+        box-shadow: 0px 0px 1px 1px red;
+    }
+    50% {
+        box-shadow: 0px 0px 3px 2px red;
+    }
+    100% {
+        box-shadow: 0px 0px 1px 1px red;
+    }
+}
+.head-portrait::before {
+    animation: huxi_light 4s ease-in-out infinite;
+}
+.head-portrait2::before {
+    animation: huxi_dark 4s ease-in-out infinite;
+}
   .head-portrait3 {
       width: 50px;
       height: 50px;

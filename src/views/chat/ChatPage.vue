@@ -162,7 +162,7 @@ onMounted(async () => {
         </div>
             <!-- <el-icon :size="iconsize"  class="specalforicon" @click="logout"><SwitchButton /></el-icon> -->
         <div class="imghuxi">
-            <img src="@/assets/8.png"  @click="logout" class="imgforavatar">
+            <img src="@/assets/8.png"  @click="logout" style="cursor: pointer;">
         </div>
     </el-row>
     <el-row class="chatPage">
