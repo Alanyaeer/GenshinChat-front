@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, computed} from 'vue'
+import { ref, onMounted, watch, computed, VueElement} from 'vue'
 import {
   Document,
   Menu as IconMenu,
@@ -27,6 +27,7 @@ import  PersonCart  from '@/components/PersonCart.vue'
 import chatwindow from './components/chatwindow.vue'
 import { useUserStore } from  '@/stores'
 import ManagePage from '../manage/ManagePage.vue'
+import { ElMessage } from 'element-plus'
 const router = useRouter()
 // import { router } from 'vue-router';
 const iconsize = ref(32)
@@ -76,21 +77,8 @@ const clickPerson = (info) => {
     }   
 }
 const Fullexpend = () => {
-    ismoving.value = true
-    isCollapse.value = !isCollapse.value
-    if(isCollapse.value === false){
-        middlesize.value = 3
+    ElMessage.warning("该功能废弃")
 
-        leftsize.value = 3
-    }
-    else {
-        leftsize.value = 1
-        setTimeout(()=>{
-            middlesize.value = 5
-
-        }, 500)
-
-    }
 }
 // TODO, 记得退出的时候要记录当前的数组顺寻
 const personCardSort = (id)=>{
@@ -151,6 +139,7 @@ onMounted(async () => {
 
 <template>
         <!-- zoomIn -->
+        
         <Transition>
             <ManagePage v-if="isshowDialog" @closeDialog="closeDialog" @clickPersonorigin="clickPerson" :come = "typeDialog" ></ManagePage>
         </Transition>
@@ -171,8 +160,9 @@ onMounted(async () => {
                 <i class="fas fa-search"><el-icon :size="20"><Search /></el-icon></i>
             </a>
         </div>
-        <div style="padding-top: 0.5%;"> 
-            <el-icon :size="iconsize"  class="specalforicon" @click="logout"><SwitchButton /></el-icon>
+            <!-- <el-icon :size="iconsize"  class="specalforicon" @click="logout"><SwitchButton /></el-icon> -->
+        <div class="imghuxi">
+            <img src="@/assets/8.png"  @click="logout" class="imgforavatar">
         </div>
     </el-row>
     <el-row class="chatPage">
@@ -180,23 +170,28 @@ onMounted(async () => {
 
         <el-col :span="leftsize" class="leftcomponent"> 
             <!-- 扩展功能 -->
-            <div class="iconbg"> <el-icon  @click="Fullexpend"><FullScreen/></el-icon>
+            <div class="iconbg">
+                <img src="@/assets/1.png" @click="Fullexpend()">
                 <span class="font"  >扩展</span> 
             </div>
             <!-- 管理自己的状态 -->
-            <div class="iconbg"> <el-icon  @click="manage(1)"><User /></el-icon>
+            <div class="iconbg">
+                <img src="@/assets/2.png" @click="manage(1)">
                 <span class="font" >管理</span>
             </div>
             <!-- 添加好友 -->
-            <div class="iconbg"><el-icon  @click="manage(2)"><CirclePlus /></el-icon>
+            <div class="iconbg">
+                <img src="@/assets/3.png" @click="manage(2)">
                 <span class="font" >添加</span>
             </div>
             <!-- 删除好友 -->
-            <div class="iconbg"><el-icon  @click="manage(3)"><Delete /></el-icon>
+            <div class="iconbg">
+                <img src="@/assets/4.png" @click="manage(3)">
                 <span class="font" >删除</span>
             </div>
             <!-- 搜索 -->
-            <div class="iconbg"> <el-icon  @click="manage(4)"><Search/></el-icon>
+            <div class="iconbg">
+                <img src="@/assets/5.png" @click="manage(4)">
                 <span class="font" >搜索</span>
             </div>
         
@@ -286,7 +281,7 @@ onMounted(async () => {
 @font-face {
     font-family: dogica;
     src: url(@/assets/font/dogica.ttf);
-    }
+}
 // .changeshow-enter-active{
 //     animation: animate__zoomIn;
 //     animation-duration: 1s;
@@ -405,12 +400,13 @@ onMounted(async () => {
             color: #ffffff;
             display: flex;
             flex-direction: column;
-            border-radius: 8px;
+            
             .font{
 
-                color: rgb(235, 224, 224);
-            
+                color: rgb(255,255,255);
+                font-weight: bold;
                 padding-top: 8px;
+                font-family: 阿里妈妈方圆体 VF Regular;
                 font-size: 15px;
                 padding-left: 4.5px;
             }

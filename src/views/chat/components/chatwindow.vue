@@ -409,17 +409,11 @@ watch(
         <div class="detail">{{ props.friendInfo.detail }}</div>
       </div>
       <div class="other-fun">
-        <span  @click="video"> 
-          <el-icon  class="other_fun_icon"><VideoCamera /></el-icon> 
-        </span>
-        <span @click="telephone">
-          <el-icon class="other_fun_icon"><Phone /></el-icon>
-        </span>
         <label for="docFile">
-          <el-icon class="other_fun_icon"><Document /></el-icon>
+         <img style="height:40px; width:40px; cursor: pointer; padding-left: 20px;"  src="@/assets/6.png">
         </label>
         <label for="imgFile">
-          <el-icon class="other_fun_icon"><PictureRounded /></el-icon>
+         <img style="height:40px; width:40px; cursor: pointer; padding-left: 20px;"   src="@/assets/7.png">
         </label>
         <input
           type="file"
@@ -578,6 +572,8 @@ watch(
       margin-top: 20px;
       font-size: 30px;
       // .icon-tupian {
+      gap: 20px;
+      cursor: pointer;
 
       // }
       input {

@@ -44,7 +44,7 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      // border: 2px solid rgb(137,140,151);
+    //   border: 2px solid rgb(137,140,151);
       border: 2px solid rgb(144,225,80);
       position:relative;
       &::before {
