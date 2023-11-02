@@ -27,7 +27,6 @@ import  PersonCart  from '@/components/PersonCart.vue'
 import chatwindow from './components/chatwindow.vue'
 import { useUserStore } from  '@/stores'
 import ManagePage from '../manage/ManagePage.vue'
-import { ElMessage } from 'element-plus'
 const router = useRouter()
 // import { router } from 'vue-router';
 const iconsize = ref(32)
@@ -57,7 +56,11 @@ const logout = async () => {
     }
     const id = await logoutuser(ids)
     if(id === 1){
-        ElMessage.success('退出登录')
+        ElNotification({
+            type: 'success',
+            title: '退出登录🥺',
+            message: '燕子你别走🤕'
+        })
     }
     userStore.removeId()
 
@@ -129,12 +132,22 @@ onMounted(async () => {
         id: user.userid
     }
     personList.value = await getFriend(id)
+    avatarUrl.value = user.userimg
+
     if(!personList.value) personList.value = []
     setInterval(async ()=>{
         personList.value = await getFriend(id)
+        console.log(userStore.userimg);
     },5000)
-    avatarUrl.value = user.userimg
 })
+watch(
+  ()=> userStore.userimg,
+  ()=>{
+    avatarUrl.value = userStore.userimg
+  },
+  {deep: true},
+  {immediate: true}
+)
 </script>
 
 <template>

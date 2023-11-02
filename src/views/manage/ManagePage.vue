@@ -129,6 +129,11 @@ const textshowfuntion = (id)=>{
   }
 }
 const uiswitch = ()=>{
+  Notification({
+    type: 'success',
+    title: '切换成功😤',
+    message: '白天模式'
+  })
   // document.getElementsByClassName('switch')[0].style.opacity = switchvalue.value ? 1 : 0
   let contentcolor =  document.getElementsByClassName('content')[0].style
   let buttomnav = document.getElementsByClassName('bottomnav')[0].style
@@ -143,12 +148,22 @@ const uiswitch = ()=>{
     buttomnav.background = '#272A37'
     buttomnav.color = '#fff'
     iconstyle.color= '#fff'
+    Notification({
+    type: 'success',
+    title: '切换成功😤',
+    message: '白天模式✨'
+  })
   }
   else{
     contentcolor.background = '#E4E4E8'
     buttomnav.background = '#E4E4E8'
     buttomnav.color = '#000'
     iconstyle.color= '#000'
+    Notification({
+    type: 'success',
+    title: '切换成功😤',
+    message: '黑天模式✨'
+  })
   } 
 }
 const close = () => {
@@ -169,7 +184,11 @@ const clickPerson = (info) => {
 const searchfriend = async ()=>{
   // if(i)
   if(searchvalue.value.trim == ''){
-    ElMessage('请输入搜索内容')
+    ElNotification({
+      type: 'warning',
+      title: '请输入搜索内容🍬',
+      message: '没输入东西就想搜索😅'
+    })
   }
   else{
     // 这里时查询全局的好友， 但是可能出现了问题？
@@ -190,7 +209,12 @@ const searchfriend = async ()=>{
       }
 
       if(isfind === false) {
-        ElMessage.warning('未能找到该用户')
+        // ElMessage.warning('未能找到该用户')
+        ElNotification({
+          type:'warning',
+          title: '查找失败🍬',
+          message: '未能找到该用户🙂'
+        })
         username.value = ''
         userdetail.value = ''
         userid.value = ''
@@ -210,7 +234,11 @@ const searchfriend = async ()=>{
       msg: searchvalue_string
     }
     Messagelist.value = await getChatMsg(params)
-    ElMessage.success("查找成功")
+    ElNotification({
+      type:'success',
+      title: '查找成功🍬',
+      message: '这个功能还没有完善捏😥'
+    })
     // getChatMsg
   }
   else {
@@ -251,7 +279,6 @@ const changehead = (img) => {
 
 }
 const save = async ()=>{
-  // ElMessage.success('保存成功')
   let params = {
     username: username.value,
     userid: userid.value,
@@ -262,6 +289,7 @@ const save = async ()=>{
   // console.log(params);
   if(nowvalue.value === 1){
     await userStore.setUser(params)
+    userStore.userimg = userimg.value
 
   }
   // if()
@@ -284,7 +312,11 @@ const save = async ()=>{
       const obj  = await addfriend(fids)
     }
     if(tempobj=== 1){
-      ElMessage.success('添加好友成功')
+      ElNotification({
+        type: 'success',
+        title: '添加好友成功🍬',
+        message: searchvaluetemp + '成为了你的好友💕'
+      })
     }
   }
 }
@@ -320,8 +352,14 @@ const closeinner = async (id)=>{
       await deletefriend(idfriend)
       const obj = await deletefriend(ids)
 
-      if(obj === 1)
-      ElMessage.success('删除成功')
+      if(obj === 1){
+        ElNotification({
+          type: 'success',
+          title: '删除好友🍬',
+          message: pcCurrent.value + '从你的好友列表中删除'
+        })
+
+      }
     }
     else{
       // getChatMsg

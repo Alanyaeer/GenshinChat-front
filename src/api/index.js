@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { ElNotification } from 'element-plus';
 //全局参数，自定义参数可在发送请求时设置
 axios.defaults.timeout = 10000 //超时时间ms
 axios.defaults.withCredentials = true
@@ -12,8 +13,12 @@ axios.interceptors.request.use(
   },
   function (error) {
     // 当请求异常时做一些处理
-    console.log('请求异常：' + JSON.stringify(error));
-    ElMessage.error('请求失败' +  JSON.stringify(error))
+
+    ElNotification({
+      type:'error',
+      title: '请求失败🎈',
+      message: '请求的时候的问题🤕'
+    })  
     return Promise.reject(error);
   }
 );
@@ -21,8 +26,11 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(function (response) {
   let red = response.data
   if(red.code === 0){
-    console.log('hello');
-    ElMessage.error(red.msg)
+    ElNotification({
+      type:'error',
+      title: '响应失败🎈',
+      message: red.msg+ '🤕'
+    })  
     return Promise.reject(red)
 
   }
@@ -31,8 +39,11 @@ axios.interceptors.response.use(function (response) {
   return red
 }, function (error) {
   // Do something with response error
-  console.log('响应出错：' )
-  ElMessage.error('响应出错')
+  ElNotification({
+    type:'error',
+    title: '响应失败🎈',
+    message: '响应的时候的问题🤕'
+  })  
   // loadingInstance.close();
   return Promise.reject(error)
 })

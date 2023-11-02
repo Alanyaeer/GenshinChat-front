@@ -127,6 +127,7 @@ const sendSocket = (message)=>{
     to: chatuser,
     text: message
   }
+  if(myid !== chatuser)
   socket.send(JSON.stringify(sendmessage))
 }
 // 关闭标签页
@@ -189,8 +190,12 @@ const sendImg = async (e) => {
   };
 
   let files = e.target.files[0];
-  if(files.size>1024*1024*2){
-    ElMessage.error("文件过大，请重新选择");
+  if(files.size>1024*1024*100){
+    ElNotification({
+        type: 'warning',
+        title: '文件过大🎢',
+        message: '选择上传该文件的压缩包✨'
+    })
     return ;
   }
   console.log(files)
@@ -239,8 +244,12 @@ const sendFile = async (e) => {
   };
   let files = e.target.files[0]; //图片文件名
   console.log(files);
-  if(files.size>1024*1024*2){
-    ElMessage.error("文件过大，请重新选择");
+  if(files.size>1024*1024*100){
+    ElNotification({
+        type: 'warning',
+        title: '文件过大🎢',
+        message: '选择上传该文件的压缩包✨'
+    })
     return ;
   }
   filesize.value =  calsize(files.size);

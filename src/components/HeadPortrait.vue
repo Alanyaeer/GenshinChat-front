@@ -91,6 +91,7 @@
           position: absolute;
           right: 0;
       }
+      
       img {
           width: 45px;
           height: 45px;

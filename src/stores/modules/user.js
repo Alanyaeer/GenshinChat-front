@@ -5,6 +5,7 @@ export const useUserStore = defineStore(
   'chat-user',
   () => {
     const userid = ref('')
+    const userimg = ref('')
     // const Jwt = ref('')
     let userInfo = {
       userid: '',
@@ -27,7 +28,6 @@ export const useUserStore = defineStore(
       await getuserInfo(params).then((res)=>{
         userInfo = res
       })
-      console.log(userInfo)
       if(userInfo.userimg === '')userInfo.userimg = new URL("@/assets/img/genshinchat.png", import.meta.url).href
       return userInfo
     }
@@ -37,7 +37,11 @@ export const useUserStore = defineStore(
       // console.log();
       console.log(obj);
       if(obj === 1){
-        ElMessage.success('保存成功')
+        ElNotification({
+          type: 'success',
+          title: '保存成功🎉',
+          message: '你的信息更新了🥳'
+        })
       }
       getUser()
       return obj
