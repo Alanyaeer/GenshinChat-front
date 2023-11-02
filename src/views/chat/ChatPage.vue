@@ -135,10 +135,10 @@ onMounted(async () => {
     avatarUrl.value = user.userimg
 
     if(!personList.value) personList.value = []
-    setInterval(async ()=>{
-        personList.value = await getFriend(id)
-        console.log(userStore.userimg);
-    },5000)
+    // setInterval(async ()=>{
+    //     personList.value = await getFriend(id)
+    //     console.log(userStore.userimg);
+    // },5000)
 })
 watch(
   ()=> userStore.userimg,

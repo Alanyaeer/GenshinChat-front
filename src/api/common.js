@@ -8,6 +8,13 @@ export const upload =  (params)=>{
         data: params
     }).then(res => res.data)
 }
+export const uploadMsg =  (params)=>{
+    return axios({
+        method: 'post',
+        baseURL: `${baseUrl}/api/saveMsg`,
+        data: params
+    }).then(res => res.data)
+}
 export const downloadbasecontent =  (params)=>{
     return axios({
         method: 'post',

@@ -10,7 +10,7 @@ import { VideoCamera,Phone, Document, PictureRounded } from '@element-plus/icons
 import { useUserStore } from '@/stores';
 import {formatTime} from '@/utils/format.js'
 import { ElMessage, uploadBaseProps } from 'element-plus';
-import {upload, downloadbasecontent, downloadfile} from '@/api/common.js'
+import {upload, uploadMsg} from '@/api/common.js'
 import axios from 'axios'
 import base from '../../../api/index'
 const baseUrl = base.baseUrl
@@ -47,7 +47,7 @@ const getFriendChatMsg = async () => {
       chatList.value = []
     }
       chatList.value.forEach(async (item) => {
-        if (item.chatType == 2 || (item.chatType == 1 && item.imgType == 2)) {
+        if ((item.chatType == 1 && item.imgType == 2)) {
           axios.get(baseUrl + "/api/downloadfile", {
             params: {
               fileName: item.fileName,
@@ -66,7 +66,6 @@ const getFriendChatMsg = async () => {
                 item.msg = es.target.result
                 item.fileName = fileNameTemp
                 console.log(item.msg)
-
                 if(item.chatType === 1){
                   srcImgList.value.push(item.msg)
                 }
@@ -149,7 +148,7 @@ const sendText = async () => {
     
     // 发送给父组件的消息
     emit('personCardSort',props.friendInfo.id)
-    upload(chatMsg)
+    uploadMsg(chatMsg)
     inputMsg.value = "";
     sendSocket(chatMsg)
   } else {
@@ -167,9 +166,10 @@ const sendEmoji = async (msg) => {
       myId: userstore.userid,
       friendId: props.friendInfo.id
     };
+    
     sendMsg(chatEmoji);
     clickEmoji();
-    upload(chatEmoji)
+    uploadMsg(chatEmoji)
     sendSocket(chatEmoji)
 }
 // 发送本地图片
@@ -190,26 +190,30 @@ const sendImg = async (e) => {
   };
 
   let files = e.target.files[0];
-  if(files.size>1024*1024*100){
+  const formData = new FormData()
+  formData.append('e', files)
+  upload(formData)
+  if(files.size>1024*1024){
     ElNotification({
         type: 'warning',
-        title: '文件过大🎢',
-        message: '选择上传该文件的压缩包✨'
+        title: '图片过大🎢',
+        message: '选择小的图片上传✨'
     })
     return ;
   }
   console.log(files)
   if (!e || !window.FileReader) return;
-
+  chatfiles.fileName = files.name
   let reader = new FileReader();
   reader.readAsDataURL(files);
   reader.onloadend = (es) => {
     // let filename = upload(chatfiles.msg)
     chatfiles.msg = es.target.result; 
     srcImgList.value.push(chatfiles.msg);
+    
     sendMsg(chatfiles);
 
-    upload(chatfiles)
+    uploadMsg(chatfiles)
     console.log(chatfiles);
     sendSocket(chatfiles)
 
@@ -243,7 +247,9 @@ const sendFile = async (e) => {
     friendId: props.friendInfo.id
   };
   let files = e.target.files[0]; //图片文件名
-  console.log(files);
+  const formData = new FormData()
+  formData.append('e', files)
+  upload(formData)
   if(files.size>1024*1024*100){
     ElNotification({
         type: 'warning',
@@ -253,8 +259,6 @@ const sendFile = async (e) => {
     return ;
   }
   filesize.value =  calsize(files.size);
-  chatFile.msg = files;
-  console.log(chatFile);
   if (files) {
     switch (files.type) {
       case "application/msword":
@@ -286,21 +290,22 @@ const sendFile = async (e) => {
     chatFile.size = filesize.value
     chatFile.fileName = files.name
     filenametemp = files.name
-    let reader = new FileReader()
-    reader.readAsDataURL(files)    
-    reader.onload = (es) => {
-      chatFile.msg = es.target.result
-      chatFile.fileName = filenametemp
-      // 这里就是在进行前端上传给后台，后台把数据转换为文件放入到文件夹里面
-      upload(chatFile)
-    }
-    // setTimeout(()=>{
-      console.log(chatFile);
-      sendSocket(chatFile)
+    uploadMsg(chatFile)
+    //发送socket过来
+    sendSocket(chatFile)
+    // let reader = new FileReader()
+    // reader.readAsDataURL(files)    
+    // reader.onload = (es) => {
+    //   chatFile.msg = es.target.result
+    //   chatFile.fileName = filenametemp
+    //   // 这里就是在进行前端上传给后台，后台把数据转换为文件放入到文件夹里面
+    //   upload(chatFile)
+    // }
+    // // setTimeout(()=>{
+    //   console.log(chatFile);
 
-    // }, 1000)
-     e.target.files = null;
-
+    // // }, 1000)
+    //  e.target.files = null;
   }
 }
 // 发送语音
@@ -312,13 +317,28 @@ const video = () => {
   ElMessage.info("视频功能开发中")
 }
 // 文件点击后下载
-const clickfile = (item)=>{
-  const a = document.createElement('a')
-  a.download = item.fileName
-  a.href = item.msg 
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
+const clickfile = async (item)=>{
+  axios.get(baseUrl + "/api/downloadfile", {
+    params: {
+      fileName: item.fileName,
+      extend: item.extend
+    },
+    responseType: "arraybuffer",
+    onDownloadProgress(progressEvent) {
+      var percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+      console.log(percentCompleted);
+    }
+  }).then(res=>new Blob([res], {type: item.extend}))
+  .then(blob=>{
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.download = item.fileName
+    a.href = url 
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  })
+
 }
 const init = ()=>{
   let userId = userstore.userid
@@ -424,20 +444,20 @@ watch(
         <label for="imgFile">
          <img style="height:40px; width:40px; cursor: pointer; padding-left: 20px;"   src="@/assets/7.png">
         </label>
+      
         <input
           type="file"
-          name=""
           id="imgFile"
           @change="sendImg"
           accept="image/*"
         />
         <input
           type="file"
-          name=""
           id="docFile"
           @change="sendFile"
           accept="application/*,text/*"
         />
+
         <!-- accept="application/*" -->
       </div>
     </div>
@@ -463,7 +483,7 @@ watch(
               v-else>
               </el-image>
             </div>
-            <div class="chat-img" v-if="item.chatType == 2">
+            <div class="chat-img" v-if="item.chatType == 2" >
               <div class="word-file">
                 <FileCard
                   :fileType="item.fileType"
@@ -501,10 +521,10 @@ watch(
               >
               </el-image>
             </div>
-            <div class="chat-img animate__animated animate__slideInUp" v-if="item.chatType == 2">
+            <div class="chat-img animate__animated animate__slideInUp" v-if="item.chatType == 2"  id="filecards">
               <div class="word-file">
                 <FileCard
-                  id="filecards"
+                 
                   :fileType="item.fileType"
                   :fileName="item.fileName"
                   :size="item.size"
