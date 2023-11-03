@@ -1,31 +1,7 @@
-<template>
-  <div class="file-card">
-    <div class="file-card-content">
-      <img src="@/assets/img/fileImg/unknowfile.png" alt="" v-if="props.fileType == 0"/>
-      <img src="@/assets/img/fileImg/word.png" alt="" v-else-if="props.fileType == 1"/>
-      <img src="@/assets/img/fileImg/excel.png" alt="" v-else-if="props.fileType == 2"/>
-      <img src="@/assets/img/fileImg/ppt.png" alt="" v-else-if="props.fileType == 3"/>
-      <img src="@/assets/img/fileImg/pdf.png" alt="" v-else-if="props.fileType == 4"/>
-      <img src="@/assets/img/fileImg/zpi.png" alt="" v-else-if="props.fileType == 5"/>
-      <img src="@/assets/img/fileImg/txt.png" alt="" v-else/>
-      <div class="word">
-        <span
-          >{{props.fileName || '未知'}}</span
-        >
-        <span>{{props.size}}</span>
-      </div>
-    </div>
-    <div class="xcprogress" v-if="props.value !== 0">
-        <div class="xcprogress-bar" :style="{ 'width': `${props.value}%` }">
-  
-        </div>
-    </div>
-  </div>
-</template>
 
 <script setup>
 import { calendarEmits } from 'element-plus';
-import { defineProps, watch, onMounted} from 'vue';
+import { defineProps, watch, onMounted, ref} from 'vue';
 const props = defineProps({
   fileType:{
     type: Number
@@ -40,6 +16,9 @@ const props = defineProps({
     type: Number
   },
   index: {
+    type: Number
+  },
+  uploadvalue: {
     type: Number
   }
   // value:{
@@ -59,13 +38,63 @@ const watchafter = ()=>{
     lock.value = true
   } 
 }
+const watchuploadafter = ()=>{
+  let bar = document.getElementsByClassName("xcprogress-bar")[0]
+    console.log(bar);
+  if(props.uploadvalue === 100){
+
+    bar.style.background = 'rgb(55, 103, 212)'
+  }
+}
 watch(
   ()=>props.value,
   ()=>watchafter(),
   {immediate:true},
   {deep: true}
 )
+watch(
+  ()=>props.uploadvalue,
+  ()=>watchuploadafter(),
+  {deep: true}
+)
+onMounted(()=>{
+  if(props.uploadvalue !== 100){
+    let bar = document.getElementsByClassName("xcprogress-bar")[0]
+    console.log(bar);
+    bar.style.background = 'rgb(65, 177, 58)'
+    // let bar = document.querySelector('xcprogress-bar')
+    // bar.style.background = 'rgb(65, 177, 58)'
+  }
+})
 </script>
+
+<template>
+  <div class="file-card">
+    <div class="file-card-content">
+      <img src="@/assets/img/fileImg/unknowfile.png" alt="" v-if="props.fileType == 0"/>
+      <img src="@/assets/img/fileImg/word.png" alt="" v-else-if="props.fileType == 1"/>
+      <img src="@/assets/img/fileImg/excel.png" alt="" v-else-if="props.fileType == 2"/>
+      <img src="@/assets/img/fileImg/ppt.png" alt="" v-else-if="props.fileType == 3"/>
+      <img src="@/assets/img/fileImg/pdf.png" alt="" v-else-if="props.fileType == 4"/>
+      <img src="@/assets/img/fileImg/zpi.png" alt="" v-else-if="props.fileType == 5"/>
+      <img src="@/assets/img/fileImg/txt.png" alt="" v-else/>
+      <div class="word">
+        <span
+          >{{props.fileName || '未知'}}</span
+        >
+        <span>{{props.size}}</span>
+      </div>
+    </div>
+    <div class="xcprogress" v-if="props.uploadvalue !== 100">
+        <div class="xcprogress-bar" :style="{ 'width': `${props. uploadvalue}%` }">
+        </div>
+    </div>
+    <div class="xcprogress" v-if="props.value !== 0">
+        <div class="xcprogress-bar" :style="{ 'width': `${props.value}%` }">
+        </div>
+    </div>
+  </div>
+</template>
 
 <style lang="scss" scoped>
 .file-card {

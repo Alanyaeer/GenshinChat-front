@@ -24,6 +24,7 @@ const valueList = ref([])
 const chatContent = ref(null)
 const filesize = ref('')
 const downloadwhich = ref("")
+const valueUploadList = ref([])
 let filenametemp = ""
 let socket;
 // const instance = getCurrentInstance()
@@ -51,6 +52,8 @@ const getFriendChatMsg = async () => {
       chatList.value.forEach(async (item) => {
         if(!valueList.value) valueList.value = []
         valueList.value.push(0)
+        if(!valueUploadList.value) valueUploadList.value = []
+        valueUploadList.value.push(100)
         if ((item.chatType == 1 && item.imgType == 2)) {
           axios.get(baseUrl + "/api/downloadfile", {
             params: {
@@ -149,6 +152,8 @@ const resetValue = (index)=>{
 }
 // 发送消息
 const sendText = async () => {
+  if(!valueUploadList.value) valueUploadList.value = []
+  valueUploadList.value.push(0)
   if (inputMsg.value) {
     let curobj = await mycontent();
     let chatMsg = {
@@ -171,6 +176,8 @@ const sendText = async () => {
 }
 // 发送表情
 const sendEmoji = async (msg) => {
+  if(!valueUploadList.value) valueUploadList.value = []
+  valueUploadList.value.push(0)
   let curobj = await mycontent();
   let chatEmoji = {
       ...curobj,
@@ -189,6 +196,8 @@ const sendEmoji = async (msg) => {
 // 发送本地图片
 const sendImg = async (e) => {
   // console.log(e);
+  if(!valueUploadList.value) valueUploadList.value = []
+  valueUploadList.value.push(0)
   let curobj = await mycontent();
   // console.log(e.target.files);
   let chatfiles = {
@@ -248,6 +257,8 @@ const calsize =  (size)=>{
 // 发送文件
 const sendFile = async (e) => { 
   let curobj = await mycontent();
+  if(!valueUploadList.value) valueUploadList.value = []
+  valueUploadList.value.push(0)
   let chatFile = {
     msg: "",
     chatType: 2, //信息类型，0文字，1图片, 2文件
@@ -263,7 +274,20 @@ const sendFile = async (e) => {
   let files = e.target.files[0]; //图片文件名
   const formData = new FormData()
   formData.append('e', files)
-  upload(formData)
+
+  axios.post('/api/upload', formData, {
+    onUploadProgress: function(progressEvent){
+      valueUploadList.value[valueUploadList.value.length - 1] = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+    // 在控制台打印上传百分比
+      console.log('上传进度：' + valueUploadList.value[valueUploadList.value.length - 1] + '%');
+    }
+  }).then(function(response){
+    console.log('上传成功');
+    sendSocket(chatFile)
+  }).catch(function(error){
+    console.log('上传失败' + error);
+  })
+  // upload(formData)
   if(files.size>1024*1024*100){
     ElNotification({
         type: 'warning',
@@ -306,7 +330,6 @@ const sendFile = async (e) => {
     filenametemp = files.name
     uploadMsg(chatFile)
     //发送socket过来
-    sendSocket(chatFile)
     // let reader = new FileReader()
     // reader.readAsDataURL(files)    
     // reader.onload = (es) => {
@@ -332,6 +355,15 @@ const video = () => {
 }
 // 文件点击后下载
 const clickfile = async (item, index)=>{
+  if(valueUploadList[index] !== 100){
+    ElNotification({
+      type: 'warning',
+      title: '通知',
+      message: '请在文件上传完成之后再下载文件🤐'
+    })
+  
+    return 
+  }
   downloadwhich.value = index
   console.log(index);
   axios.get(baseUrl + "/api/downloadfile", {
@@ -365,7 +397,7 @@ const init = ()=>{
     console.log("您的浏览器不支持WebSocket")
   }
   else{
-    let socketUrl = "ws://192.168.46.177:8080/imserver/" + userId
+    let socketUrl = "ws://localhost:8080/imserver/" + userId
     if(socket != null){
       console.log(socket);
 
@@ -510,7 +542,7 @@ watch(
                   :fileName="item.fileName"
                   :size="item.size"
                   :value="valueList[index]"
-                  
+                  :uploadvalue="valueUploadList[index]"
                   @click="clickfile(item, index)"
                   @resetValue = "resetValue"
                 > 
@@ -552,6 +584,7 @@ watch(
                   :fileName="item.fileName"
                   :size="item.size"
                   :value="valueList[index]"
+                  :uploadvalue="valueUploadList[index]"
                   @click="clickfile(item, index)"
                   @resetValue = "resetValue"
                 >
