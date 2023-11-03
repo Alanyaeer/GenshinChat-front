@@ -1,56 +1,94 @@
 <template>
   <div class="file-card">
-    <img src="@/assets/img/fileImg/unknowfile.png" alt="" v-if="fileType == 0"/>
-    <img src="@/assets/img/fileImg/word.png" alt="" v-else-if="fileType == 1"/>
-    <img src="@/assets/img/fileImg/excel.png" alt="" v-else-if="fileType == 2"/>
-    <img src="@/assets/img/fileImg/ppt.png" alt="" v-else-if="fileType == 3"/>
-    <img src="@/assets/img/fileImg/pdf.png" alt="" v-else-if="fileType == 4"/>
-    <img src="@/assets/img/fileImg/zpi.png" alt="" v-else-if="fileType == 5"/>
-    <img src="@/assets/img/fileImg/txt.png" alt="" v-else/>
-    <div class="word">
-      <span
-        >{{fileName || '未知'}}</span
-      >
-      <span>{{size}}</span>
+    <div class="file-card-content">
+      <img src="@/assets/img/fileImg/unknowfile.png" alt="" v-if="props.fileType == 0"/>
+      <img src="@/assets/img/fileImg/word.png" alt="" v-else-if="props.fileType == 1"/>
+      <img src="@/assets/img/fileImg/excel.png" alt="" v-else-if="props.fileType == 2"/>
+      <img src="@/assets/img/fileImg/ppt.png" alt="" v-else-if="props.fileType == 3"/>
+      <img src="@/assets/img/fileImg/pdf.png" alt="" v-else-if="props.fileType == 4"/>
+      <img src="@/assets/img/fileImg/zpi.png" alt="" v-else-if="props.fileType == 5"/>
+      <img src="@/assets/img/fileImg/txt.png" alt="" v-else/>
+      <div class="word">
+        <span
+          >{{props.fileName || '未知'}}</span
+        >
+        <span>{{props.size}}</span>
+      </div>
+    </div>
+    <div class="xcprogress" v-if="props.value !== 0">
+        <div class="xcprogress-bar" :style="{ 'width': `${props.value}%` }">
+  
+        </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  // props: ["fileType", "file"],
-  props: {
-    fileType: Number,
-    fileName: String,
-    size: String,
-    default() {
-      return {};
-    },
+<script setup>
+import { calendarEmits } from 'element-plus';
+import { defineProps, watch, onMounted} from 'vue';
+const props = defineProps({
+  fileType:{
+    type: Number
   },
-  watch: {
-    file() {
-    },
-  },  
-  mounted() {
+  fileName:{
+    type: String
+  },
+  size:{
+    type: String
+  },
+  value: {
+    type: Number
+  },
+  index: {
+    type: Number
   }
-};
+  // value:{
+  //   type: Number
+  // }
+})
+const lock = ref(true)
+const emit = defineEmits('resetValue')
+const watchafter = ()=>{
+  if(props.value === 100 && lock.value === true){
+    console.log(props.index);
+    // props.value = 0
+    emit('resetValue', props.index)
+    lock.value = false
+  }
+  else if(props.value === 0){
+    lock.value = true
+  } 
+}
+watch(
+  ()=>props.value,
+  ()=>watchafter(),
+  {immediate:true},
+  {deep: true}
+)
 </script>
 
 <style lang="scss" scoped>
 .file-card {
   width: 250px;
-  height: 100px;
+  height: 80px;
   background-color: rgb(45, 48, 63);
   border-radius: 20px;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
+  // justify-content: center;
+  // align-items: center;
+  padding-top: 10px;
+  padding-bottom: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
   box-sizing: border-box;
+ 
+  flex-direction: column;
   cursor: pointer;
-  &:hover {
-    background-color: rgb(33, 36, 54);
-  }
+  .file-card-content{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
   img {
     width: 60px;
     height: 60px;
@@ -74,6 +112,50 @@ export default {
       font-size: 12px;
       color: rgb(180, 180, 180);
     }
+  }
+  }
+
+  .xcprogress {
+    width: 230px;
+    height: 5px;
+    background: #e5e5e5;
+    border-radius: 4px;
+    overflow: hidden;
+
+}
+
+.xcprogress-bar {
+    width: 0;
+    height: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background: rgb(55, 103, 212);
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+    background-size: 40px 40px;
+    transition: width .6s ease;
+    border-radius: 4px;
+    animation: xcprogress-bar-anim 2s linear infinite;
+}
+
+.xcprogress-bar-value {
+    font-size: 5px;
+    font-weight: bold;
+    color: white;
+    margin-right: 5px;
+}
+
+@keyframes xcprogress-bar-anim {
+    from {
+        background-position: 80px 0;
+    }
+
+    to {
+        background-position: 0 0;
+    }
+}
+&:hover {
+    background-color: rgb(33, 36, 54);
   }
 }
 </style>

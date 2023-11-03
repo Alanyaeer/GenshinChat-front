@@ -9,7 +9,7 @@ import { saveChatMsg} from '@/api/getData.js'
 import { VideoCamera,Phone, Document, PictureRounded } from '@element-plus/icons-vue';
 import { useUserStore } from '@/stores';
 import {formatTime} from '@/utils/format.js'
-import { ElMessage, uploadBaseProps } from 'element-plus';
+import { ElMessage, ElNotification, uploadBaseProps } from 'element-plus';
 import {upload, uploadMsg} from '@/api/common.js'
 import axios from 'axios'
 import base from '../../../api/index'
@@ -20,8 +20,10 @@ const chatList = ref([])
 const inputMsg = ref("")  
 const showEmoji = ref(false)
 const srcImgList = ref([])
+const valueList = ref([])
 const chatContent = ref(null)
 const filesize = ref('')
+const downloadwhich = ref("")
 let filenametemp = ""
 let socket;
 // const instance = getCurrentInstance()
@@ -47,6 +49,8 @@ const getFriendChatMsg = async () => {
       chatList.value = []
     }
       chatList.value.forEach(async (item) => {
+        if(!valueList.value) valueList.value = []
+        valueList.value.push(0)
         if ((item.chatType == 1 && item.imgType == 2)) {
           axios.get(baseUrl + "/api/downloadfile", {
             params: {
@@ -82,7 +86,8 @@ const sendMsg = async (msgList) => {
   if(!chatList.value){
       chatList.value = []
   }
-
+  if(!valueList.value) valueList.value = []
+  valueList.value.push(0)
   chatList.value.push(msgList);
   console.log(msgList);
   // await saveChatMsg(msgList)
@@ -132,6 +137,15 @@ const sendSocket = (message)=>{
 // 关闭标签页
 const clickEmoji = () => {
   showEmoji.value = !showEmoji.value;
+}
+const resetValue = (index)=>{
+  valueList.value[index] = 0
+  console.log(valueList.value[index], index);
+  ElNotification({
+    type: 'success',
+    title: '获得了一个文件🎉',
+    message: '下载成功🥳'
+  })
 }
 // 发送消息
 const sendText = async () => {
@@ -317,7 +331,9 @@ const video = () => {
   ElMessage.info("视频功能开发中")
 }
 // 文件点击后下载
-const clickfile = async (item)=>{
+const clickfile = async (item, index)=>{
+  downloadwhich.value = index
+  console.log(index);
   axios.get(baseUrl + "/api/downloadfile", {
     params: {
       fileName: item.fileName,
@@ -325,8 +341,11 @@ const clickfile = async (item)=>{
     },
     responseType: "arraybuffer",
     onDownloadProgress(progressEvent) {
-      var percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-      console.log(percentCompleted);
+      valueList.value[index] = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+      // if(valueList.value[index] === 100){
+      //   resetValue(index)
+      // }
+      console.log(valueList.value[index]);
     }
   }).then(res=>new Blob([res], {type: item.extend}))
   .then(blob=>{
@@ -346,7 +365,7 @@ const init = ()=>{
     console.log("您的浏览器不支持WebSocket")
   }
   else{
-    let socketUrl = "ws://localhost:8080/imserver/" + userId
+    let socketUrl = "ws://192.168.46.177:8080/imserver/" + userId
     if(socket != null){
       console.log(socket);
 
@@ -463,12 +482,12 @@ watch(
     </div>
     <div class="botoom">
       <div class="chat-content" ref="chatContent">
-        <div class="chat-wrapper " v-for="item in chatList" :key="item.id">
+        <div class="chat-wrapper " v-for="(item, index) in chatList" :key="item.id">
           <div class="chat-friend" v-if="item.uid !== userstore.userid">
             <div class="chat-text " v-if="item.chatType == 0">
               {{ item.msg }}
             </div>
-            <div class="chat-img" v-if="item.chatType == 1" >
+            <div class="chat-img" v-if="item.chatType == 1" :class="`${index}`">
               
               <img
                 :src="item.msg"
@@ -483,15 +502,19 @@ watch(
               v-else>
               </el-image>
             </div>
-            <div class="chat-img" v-if="item.chatType == 2" >
+            <div class="chat-img" v-if="item.chatType == 2" :class="`${index}`">
               <div class="word-file">
                 <FileCard
+                  :index="index"
                   :fileType="item.fileType"
-                  :file="item.msg"
                   :fileName="item.fileName"
                   :size="item.size"
-                  @click="clickfile(item)"
-                ></FileCard>
+                  :value="valueList[index]"
+                  
+                  @click="clickfile(item, index)"
+                  @resetValue = "resetValue"
+                > 
+              </FileCard>
               </div>
             </div>
             <div class="info-time">
@@ -521,15 +544,19 @@ watch(
               >
               </el-image>
             </div>
-            <div class="chat-img animate__animated animate__slideInUp" v-if="item.chatType == 2"  id="filecards">
+            <div class="chat-img animate__animated animate__slideInUp" v-if="item.chatType == 2" :class="`${index}`">
               <div class="word-file">
                 <FileCard
-                 
+                  :index="index"
                   :fileType="item.fileType"
                   :fileName="item.fileName"
                   :size="item.size"
-                  @click="clickfile(item)"
-                ></FileCard>
+                  :value="valueList[index]"
+                  @click="clickfile(item, index)"
+                  @resetValue = "resetValue"
+                >
+                </FileCard>
+
               </div>
             </div>
             <div class="info-time ">
@@ -669,6 +696,7 @@ watch(
               width: 100px;
               height: 100px;
             }
+    
           }
           .info-time {
             margin: 10px 0;
