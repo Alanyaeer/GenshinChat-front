@@ -355,7 +355,8 @@ const video = () => {
 }
 // 文件点击后下载
 const clickfile = async (item, index)=>{
-  if(valueUploadList[index] !== 100){
+
+  if(valueUploadList.value[index] !== 100){
     ElNotification({
       type: 'warning',
       title: '通知',
@@ -374,9 +375,6 @@ const clickfile = async (item, index)=>{
     responseType: "arraybuffer",
     onDownloadProgress(progressEvent) {
       valueList.value[index] = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-      // if(valueList.value[index] === 100){
-      //   resetValue(index)
-      // }
       console.log(valueList.value[index]);
     }
   }).then(res=>new Blob([res], {type: item.extend}))

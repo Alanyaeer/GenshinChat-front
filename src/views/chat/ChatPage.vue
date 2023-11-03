@@ -27,6 +27,7 @@ import  PersonCart  from '@/components/PersonCart.vue'
 import chatwindow from './components/chatwindow.vue'
 import { useUserStore } from  '@/stores'
 import ManagePage from '../manage/ManagePage.vue'
+import MutiChat from '../manage/MutiChat.vue'
 const router = useRouter()
 // import { router } from 'vue-router';
 const iconsize = ref(32)
@@ -48,6 +49,7 @@ const userStore = useUserStore()
 const onperson = ref(0)
 // 判断消息的来源
 const direction = ref(false)
+const isShowMutiChat = ref(false)
 
 
 const logout = async () => {
@@ -80,7 +82,7 @@ const clickPerson = (info) => {
     }   
 }
 const Fullexpend = () => {
-    ElMessage.warning("该功能废弃")
+    isShowMutiChat.value = true
 
 }
 // TODO, 记得退出的时候要记录当前的数组顺寻
@@ -126,6 +128,9 @@ const manage = (id) => {
 const onlineperson = computed(()=>{
     return personList.value.filter((person)=>(person.status === true)).length
 })
+const closeMuti = ()=>{
+    isShowMutiChat.value = false
+}
 onMounted(async () => {
     const user = await userStore.getUser()
     let id = {
@@ -155,9 +160,12 @@ watch(
         
         <Transition>
             <ManagePage v-if="isshowDialog" @closeDialog="closeDialog" @clickPersonorigin="clickPerson" :come = "typeDialog" ></ManagePage>
+            
         </Transition>
-        
-
+        <Transition>
+            
+            <MutiChat v-if="isShowMutiChat" @closeMuti="closeMuti" :friends="personList">  </MutiChat>
+        </Transition>
         <el-row class="chatPageheader">
         <div >
             <el-avatar
@@ -185,7 +193,7 @@ watch(
             <!-- 扩展功能 -->
             <div class="iconbg">
                 <img src="@/assets/1.png" @click="Fullexpend()">
-                <span class="font"  >扩展</span> 
+                <span class="font"  >群聊</span> 
             </div>
             <!-- 管理自己的状态 -->
             <div class="iconbg">

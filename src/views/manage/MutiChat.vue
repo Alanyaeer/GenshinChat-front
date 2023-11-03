@@ -5,8 +5,11 @@ import { ElIcon, ElNotification} from 'element-plus';
 import { defineEmits ,watch, defineProps, ref, onMounted, computed} from 'vue';
 import {Delete, Minus,Search} from '@element-plus/icons-vue'
 const props = defineProps({
+    friends: {
+        type: Array
+    }
 })
-const emit = defineEmits('closeChatMulti')
+const emit = defineEmits('closeMuti')
 const current = ref('')
 const findPerson = ref({})
 const isActive = () => {
@@ -28,60 +31,7 @@ const calPersonCnt = computed(
 // 测试使用 ？？ 
 onMounted(()=>{
     personInfo.value = []
-    personInfo.value.push({
-        headImg: 'http://localhost:8080/assets/head_portrait5-d3013e16.jpg',
-            name: 'wsss',
-            detail: 'sss',
-            id: '114514'
-    })
-    personInfo.value.push({
-        headImg: 'http://localhost:8080/assets/head_portrait4-2b9ed6fb.jpg',
-            name: 'wwsss',
-            detail: 'ssss',
-            id: '114512'
-    })
-    personInfo.value.push({
-        headImg: 'http://localhost:8080/assets/head_portrait4-2b9ed6fb.jpg',
-            name: 'wwsss',
-            detail: 'ssss',
-            id: '114513'
-    })
-    personInfo.value.push({
-        headImg: 'http://localhost:8080/assets/head_portrait4-2b9ed6fb.jpg',
-            name: 'wwsss',
-            detail: 'ssss',
-            id: '114515'
-    })
-    personInfo.value.push({
-        headImg: 'http://localhost:8080/assets/head_portrait4-2b9ed6fb.jpg',
-            name: 'wwsss',
-            detail: 'ssss',
-            id: '114516'
-    })
-    personInfo.value.push({
-        headImg: 'http://localhost:8080/assets/head_portrait4-2b9ed6fb.jpg',
-            name: 'wwsss',
-            detail: 'ssss',
-            id: '114517'
-    })
-    personInfo.value.push({
-        headImg: 'http://localhost:8080/assets/head_portrait4-2b9ed6fb.jpg',
-            name: 'wwsss',
-            detail: 'ssss',
-            id: '114518'
-    })
-    personInfo.value.push({
-        headImg: 'http://localhost:8080/assets/head_portrait4-2b9ed6fb.jpg',
-            name: 'wwsss',
-            detail: 'ssss',
-            id: '114519'
-    })
-    personInfo.value.push({
-        headImg: 'http://localhost:8080/assets/head_portrait4-2b9ed6fb.jpg',
-            name: 'wwsss',
-            detail: 'ssss',
-            id: '114520'
-    })
+    personInfo.value = props.friends
     if(personInfo.value.length != 0)
     findPerson.value = personInfo.value[personInfo.value.length - 1]
     // beingclick.value = new Array(personInfo.value.length)
@@ -91,7 +41,7 @@ onMounted(()=>{
     }
 })
 const close = ()=>{
-    emit('closeChatMulti')
+    emit('closeMuti')
     console.log('关闭弹窗');
 }
 const clickperson = (index)=>{
