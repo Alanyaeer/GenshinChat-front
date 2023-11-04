@@ -26,9 +26,9 @@ const props = defineProps({
   // }
 })
 const lock = ref(true)
-const emit = defineEmits('resetValue')
+const emit = defineEmits('resetValue', 'sethundred')
 const watchafter = ()=>{
-  if(props.value === 100 && lock.value === true){
+  if(props.value >= 100 && lock.value === true){
     console.log(props.index);
     // props.value = 0
     emit('resetValue', props.index)
@@ -38,12 +38,21 @@ const watchafter = ()=>{
     lock.value = true
   } 
 }
-
+const watchupload = ()=>{
+  if(props.uploadvalue >= 100){
+    emit('sethundred',props.index)
+  }
+}
 
 watch(
   ()=>props.value,
   ()=>watchafter(),
   {immediate:true},
+  {deep: true}
+)
+watch(
+  ()=> props.value,
+  ()=> watchupload(),
   {deep: true}
 )
 onMounted(()=>{

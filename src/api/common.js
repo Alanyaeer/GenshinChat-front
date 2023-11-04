@@ -29,3 +29,17 @@ export const downloadfile =  (params)=>{
         data: params
     }).then(res => res.data)
 }
+export const reUpload =  (params)=>{
+    return axios({
+        method: 'post',
+        baseURL: `${baseUrl}/api/reupload`,
+        data: params
+    }).then(res => res.data)
+}
+export const fileMerge =  (params)=>{
+    return axios({
+        method: 'post',
+        baseURL: `${baseUrl}/api/merge`,
+        data: params
+    }).then(res => res.data)
+}

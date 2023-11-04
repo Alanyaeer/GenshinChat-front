@@ -10,8 +10,9 @@ import { VideoCamera,Phone, Document, PictureRounded } from '@element-plus/icons
 import { useUserStore } from '@/stores';
 import {formatTime} from '@/utils/format.js'
 import { ElMessage, ElNotification, uploadBaseProps } from 'element-plus';
-import {upload, uploadMsg} from '@/api/common.js'
+import {upload, uploadMsg, reUpload, fileMerge} from '@/api/common.js'
 import axios from 'axios'
+import SparkMD5 from 'spark-md5' 
 import base from '../../../api/index'
 const baseUrl = base.baseUrl
 // 声明变量
@@ -23,8 +24,10 @@ const srcImgList = ref([])
 const valueList = ref([])
 const chatContent = ref(null)
 const filesize = ref('')
+const stopupload = ref([])
 const downloadwhich = ref("")
 const valueUploadList = ref([])
+const recordfile = ref([])
 let filenametemp = ""
 let socket;
 // const instance = getCurrentInstance()
@@ -54,6 +57,8 @@ const getFriendChatMsg = async () => {
         valueList.value.push(0)
         if(!valueUploadList.value) valueUploadList.value = []
         valueUploadList.value.push(100)
+        if(!stopupload.vlaue) stopupload.value = []
+        stopupload.value.push(true)
         if ((item.chatType == 1 && item.imgType == 2)) {
           axios.get(baseUrl + "/api/downloadfile", {
             params: {
@@ -85,7 +90,7 @@ const getFriendChatMsg = async () => {
   });
 }
 // 发送信息
-const sendMsg = async (msgList, type) => {
+const sendMsg = async (msgList) => {
   if(!chatList.value){
       chatList.value = []
   }
@@ -116,6 +121,10 @@ const mycontent = async () => {
     uid: userInfo.userid,
     time: formatTime(new Date()),
   }
+}
+const sethundred = (index)=>{
+ valueUploadList.value[index] = 100.0
+
 }
 const sendSocket = (message)=>{
   let chatuser = props.friendInfo.id
@@ -153,7 +162,9 @@ const resetValue = (index)=>{
 // 发送消息
 const sendText = async () => {
   if(!valueUploadList.value) valueUploadList.value = []
-  valueUploadList.value.push(0)
+  valueUploadList.value.push(0.0)
+  if(!stopupload.vlaue) stopupload.value = []
+        stopupload.value.push(true)
   if (inputMsg.value) {
     let curobj = await mycontent();
     let chatMsg = {
@@ -177,7 +188,9 @@ const sendText = async () => {
 // 发送表情
 const sendEmoji = async (msg) => {
   if(!valueUploadList.value) valueUploadList.value = []
-  valueUploadList.value.push(0)
+  valueUploadList.value.push(0.0)
+  if(!stopupload.vlaue) stopupload.value = []
+        stopupload.value.push(true)
   let curobj = await mycontent();
   let chatEmoji = {
       ...curobj,
@@ -197,7 +210,9 @@ const sendEmoji = async (msg) => {
 const sendImg = async (e) => {
   // console.log(e);
   if(!valueUploadList.value) valueUploadList.value = []
-  valueUploadList.value.push(0)
+  valueUploadList.value.push(0.0)
+  if(!stopupload.vlaue) stopupload.value = []
+        stopupload.value.push(true)
   let curobj = await mycontent();
   // console.log(e.target.files);
   let chatfiles = {
@@ -224,7 +239,6 @@ const sendImg = async (e) => {
     })
     return ;
   }
-  console.log(files)
   if (!e || !window.FileReader) return;
   chatfiles.fileName = files.name
   let reader = new FileReader();
@@ -256,9 +270,16 @@ const calsize =  (size)=>{
 }
 // 发送文件
 const sendFile = async (e) => { 
+  
   let curobj = await mycontent();
   if(!valueUploadList.value) valueUploadList.value = []
-  valueUploadList.value.push(0)
+  valueUploadList.value.push(0.0)
+  if(!stopupload.value) stopupload.value = []
+        stopupload.value.push(true)
+  const index = valueUploadList.value.length - 1
+  // if(!recordfile.value)  recordfile.value = []
+  // if(recordfile.value[])
+  // recordfile[stopupload.value.length - 1] = e;
   let chatFile = {
     msg: "",
     chatType: 2, //信息类型，0文字，1图片, 2文件
@@ -272,40 +293,7 @@ const sendFile = async (e) => {
     friendId: props.friendInfo.id
   };
   let files = e.target.files[0]; //图片文件名
-  const formData = new FormData()
-  formData.append('e', files)
-  const index = valueUploadList.value.length - 1
-  axios.post('/api/upload', formData, {
-    onUploadProgress: function(progressEvent){
-      function sendHeartbeat() {  
-        setTimeout(function() {  
-          if (socket.readyState === WebSocket.OPEN) {  
-            socket.send(''); // 发送空的心跳包给服务器  
-            sendHeartbeat(); // 递归调用发送心跳包函数，以保持连接活跃  
-          } else {  
-            console.log('WebSocket连接已关闭');  
-          }  
-        }, 5000); // 每30秒发送一次心跳包给服务器  
-      }
-      
-      valueUploadList.value[index] = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-    // 在控制台打印上传百分比
-      console.log('上传进度：' + valueUploadList.value[index] + '%');
-    }
-  }).then(function(response){
-    console.log('上传成功');
-    sendSocket(chatFile)
-    ElNotification({
-      type: 'success',
-      title: '上传了一个文件🎉',
-      message: '上传成功🥳'
-    })
-    return
-  }).catch(function(error){
-    console.log('上传失败' + error);
-  })
-  // upload(formData)
-  if(files.size>1024*1024*100){
+  if(files.size>1024*1024*500){
     ElNotification({
         type: 'warning',
         title: '文件过大🎢',
@@ -313,6 +301,146 @@ const sendFile = async (e) => {
     })
     return ;
   }
+  const formData = new FormData()
+  formData.append('e', files)
+  
+  // 策略2 分片上传
+  const filesizes = files.size
+  if(files.size >  1024 * 1024){
+    const uploadslice = async()=>{
+    if(!files)return 
+    const chunks = createChunks(files,1024 * 1024)
+    let uploadvalue = 0
+    const result = await hash(chunks)
+    let ispassfile = false
+    let reuploadobj = {
+      result: result
+    }
+    let reuploadcnt = await reUpload(reuploadobj)
+    // 现在上传了 reuploadcnt  个文件对吧
+    // reuploadcnt * 1024
+    if(reuploadcnt !== chunks.length)
+      valueUploadList.value[index] += (reuploadcnt * 1024 * 1024 * 100) / filesizes
+    else 
+      valueUploadList.value[index] = 100.0
+    for(let i = reuploadcnt; i < chunks.length; ++i){
+      if(stopupload.value[index] === false) break
+      // let file = chunks[i]
+      let chunkcnt = i
+      let md5 = result
+      const formData = new FormData()
+      const blob = chunks[i]
+    
+      formData.append('file', blob)
+      formData.append('hash', result)
+      formData.append('chunkcnt', i)
+      formData.append('filename', files.name)
+      formData.append('totalCnt', chunks.length - 1)  
+      await axios.post('/api/uploadslice', (formData),{
+          onUploadProgress: function(progressEvent){
+            function sendHeartbeat() {  
+              setTimeout(function() {  
+                if (socket.readyState === WebSocket.OPEN) {  
+                  socket.send(''); // 发送空的心跳包给服务器  
+                  sendHeartbeat(); // 递归调用发送心跳包函数，以保持连接活跃  
+                } else {  
+                  console.log('WebSocket连接已关闭');  
+                }  
+              }, 5000); // 每30秒发送一次心跳包给服务器  
+            }
+              
+      // 在控制台打印上传百分比
+              // console.log("{}: {}",progressEvent.loaded * 100 );
+              console.log(progressEvent.loaded * 100,progressEvent.total);
+              console.log(progressEvent.loaded * 100, filesize);
+            
+              valueUploadList.value[index] +=( (progressEvent.loaded * 100) / filesizes)
+              console.log('上传进度：' + valueUploadList.value[index] + '%');
+            } 
+        })
+    }
+    let merge = {
+      hash:  result,
+      filename: files.name,
+      totalCnt: chunks.length - 1
+    }
+    const finish = await fileMerge(merge)
+    if(finish === 1){
+      valueUploadList.value[index] = 100
+    }
+    sendSocket(chatFile)
+    ElNotification({
+      type: 'success',
+      title: '上传了一个文件🎉',
+      message: '上传成功🥳'
+    })
+  }
+  // if(stopupload.value[index] === false) break
+    function createChunks(files, chunkSize) {
+      const results = []
+      for(let i = 0; i < files.size; i += chunkSize){
+        results.push(files.slice(i, i + chunkSize))
+      }
+      return results
+    }
+    // 增量算法
+    function hash(chunks){
+      const spark = new SparkMD5
+      return new Promise(resovle=>{
+          function _read(i){
+          if(i >= chunks.length){
+            //输出一个哈希
+            resovle(spark.end());
+            return ;
+          }
+          const blob = chunks[i]
+          const reader = new FileReader
+          reader.onload = e=>{
+            const bytes = e.target.result
+            spark.append(bytes)
+            _read(i + 1)
+          } 
+          reader.readAsArrayBuffer(blob)
+        }
+        _read(0)
+      })
+    }
+    uploadslice()
+  }
+  else{
+  axios.post('/api/upload', formData, {
+      onUploadProgress: function(progressEvent){
+        function sendHeartbeat() {  
+          setTimeout(function() {  
+            if (socket.readyState === WebSocket.OPEN) {  
+              socket.send(''); // 发送空的心跳包给服务器  
+              sendHeartbeat(); // 递归调用发送心跳包函数，以保持连接活跃  
+            } else {  
+              console.log('WebSocket连接已关闭');  
+            }  
+          }, 5000); // 每30秒发送一次心跳包给服务器  
+        }
+        
+        valueUploadList.value[index] = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+      // 在控制台打印上传百分比
+        console.log('上传进度：' + valueUploadList.value[index] + '%');
+      }
+    }).then(function(response){
+      console.log('上传成功');
+      sendSocket(chatFile)
+      ElNotification({
+        type: 'success',
+        title: '上传了一个文件🎉',
+        message: '上传成功🥳'
+      })
+      return
+    }).catch(function(error){
+      console.log('上传失败' + error);
+    })
+    upload(formData)
+  }
+ 
+  
   filesize.value = calsize(files.size);
   if (files) {
     switch (files.type) {
@@ -341,10 +469,12 @@ const sendFile = async (e) => {
       default:
         chatFile.fileType = 0;
     }
+    console.log('minasan我要发送数据了');
     sendMsg(chatFile);
     chatFile.size = filesize.value
     chatFile.fileName = files.name
     filenametemp = files.name
+    uploadMsg(chatFile)
     //发送socket过来
     // let reader = new FileReader()
     // reader.readAsDataURL(files)    
@@ -361,6 +491,16 @@ const sendFile = async (e) => {
     //  e.target.files = null;
   }
 }
+function sendHeartbeat() {  
+  setTimeout(function() {  
+    if (socket.readyState === WebSocket.OPEN) {  
+      socket.send(''); // 发送空的心跳包给服务器  
+      sendHeartbeat(); // 递归调用发送心跳包函数，以保持连接活跃  
+    } else {  
+      console.log('WebSocket连接已关闭');  
+    }  
+  }, 5000); // 每30秒发送一次心跳包给服务器  
+}
 // 发送语音
 const telephone = () => {
   ElMessage.info("语音功能开发中")
@@ -371,14 +511,23 @@ const video = () => {
 }
 // 文件点击后下载
 const clickfile = async (item, index)=>{
-
+  
   if(valueUploadList.value[index] !== 100){
-    ElNotification({
+    stopupload.value[index] = !stopupload.value[index]
+    if(stopupload.value[index] === false){
+        ElNotification({
+        type: 'warning',
+        title: '通知',
+        message: '文件暂停上传🤐'
+      })
+    }
+    else {
+      ElNotification({
       type: 'warning',
       title: '通知',
-      message: '请在文件上传完成之后再下载文件🤐'
+      message: '文件开始继续上传🤐'
     })
-  
+    }
     return 
   }
   downloadwhich.value = index
@@ -441,33 +590,6 @@ const init = ()=>{
           if(cur.chatType === 1 && cur.imgType === 2){
             srcImgList.value.push(cur.msg)
           }
-          // 如果接受到文件需要到数据库中下载
-          // else if(cur.chatType === 2){
-          //   axios.get(baseUrl + "/api/downloadfile", {
-          //   params: {
-          //     fileName: cur.fileName,
-          //     extend: cur.extend
-          //   },
-          //   responseType: "arraybuffer"
-          //   })
-          //   .then(res=>new Blob([res], {type: cur.extend}))
-          //   .then(blob=> new File([blob], cur.fileName))
-          //   .then(file=>{
-          //     cur.msg = file
-          //     let reader = new FileReader()
-          //     let fileNameTemp = cur.fileName
-          //     reader.onloadend = (es)=>{
-          //       cur.msg = es.target.result
-          //       cur.fileName = fileNameTemp
-          //     }
-          //     reader.readAsDataURL(file)
-          //   }).then(()=>{
-          //     setTimeout(()=>{
-          //       sendMsg(cur)
-
-          //     }, 500)
-          //   })
-          // }
           if(cur.chatType === 2) valueUploadList.value.push(100) 
           else valueUploadList.value.push(0)
           sendMsg(cur, "now")          
@@ -564,6 +686,7 @@ watch(
                   :uploadvalue="valueUploadList[index]"
                   @click="clickfile(item, index)"
                   @resetValue = "resetValue"
+                  @sethundred = "sethundred"
                 > 
               </FileCard>
               </div>
@@ -606,6 +729,7 @@ watch(
                   :uploadvalue="valueUploadList[index]"
                   @click="clickfile(item, index)"
                   @resetValue = "resetValue"
+                  @sethundred = "sethundred"
                 >
                 </FileCard>
 
