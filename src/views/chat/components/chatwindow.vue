@@ -85,7 +85,7 @@ const getFriendChatMsg = async () => {
   });
 }
 // 发送信息
-const sendMsg = async (msgList) => {
+const sendMsg = async (msgList, type) => {
   if(!chatList.value){
       chatList.value = []
   }
@@ -274,16 +274,33 @@ const sendFile = async (e) => {
   let files = e.target.files[0]; //图片文件名
   const formData = new FormData()
   formData.append('e', files)
-
+  const index = valueUploadList.value.length - 1
   axios.post('/api/upload', formData, {
     onUploadProgress: function(progressEvent){
-      valueUploadList.value[valueUploadList.value.length - 1] = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+      function sendHeartbeat() {  
+        setTimeout(function() {  
+          if (socket.readyState === WebSocket.OPEN) {  
+            socket.send(''); // 发送空的心跳包给服务器  
+            sendHeartbeat(); // 递归调用发送心跳包函数，以保持连接活跃  
+          } else {  
+            console.log('WebSocket连接已关闭');  
+          }  
+        }, 5000); // 每30秒发送一次心跳包给服务器  
+      }
+      
+      valueUploadList.value[index] = Math.round((progressEvent.loaded * 100) / progressEvent.total)
     // 在控制台打印上传百分比
-      console.log('上传进度：' + valueUploadList.value[valueUploadList.value.length - 1] + '%');
+      console.log('上传进度：' + valueUploadList.value[index] + '%');
     }
   }).then(function(response){
     console.log('上传成功');
     sendSocket(chatFile)
+    ElNotification({
+      type: 'success',
+      title: '上传了一个文件🎉',
+      message: '上传成功🥳'
+    })
+    return
   }).catch(function(error){
     console.log('上传失败' + error);
   })
@@ -296,7 +313,7 @@ const sendFile = async (e) => {
     })
     return ;
   }
-  filesize.value =  calsize(files.size);
+  filesize.value = calsize(files.size);
   if (files) {
     switch (files.type) {
       case "application/msword":
@@ -328,7 +345,6 @@ const sendFile = async (e) => {
     chatFile.size = filesize.value
     chatFile.fileName = files.name
     filenametemp = files.name
-    uploadMsg(chatFile)
     //发送socket过来
     // let reader = new FileReader()
     // reader.readAsDataURL(files)    
@@ -405,8 +421,13 @@ const init = ()=>{
     socket = new WebSocket(socketUrl)
     socket.onopen = function () {
         console.log("websocket已打开");
+        sendHeartbeat(); 
     };
     socket.onmessage = function (msg) {
+      if(msg === ""){
+        console.log('保持连接测试');
+        return 
+      }
       console.log("收到数据====" + msg.data)
       let data = JSON.parse(msg.data)  // 对收到的json数据进行解析， 类似这样的： {"users": [{"username": "zhang"},{ "username": "admin"}]}
       if (data.users) {  // 获取在线人员信息
@@ -419,37 +440,37 @@ const init = ()=>{
           let cur = JSON.parse(data.text)
           if(cur.chatType === 1 && cur.imgType === 2){
             srcImgList.value.push(cur.msg)
-            sendMsg(cur)
-
           }
           // 如果接受到文件需要到数据库中下载
-          else if(cur.chatType === 2){
-            axios.get(baseUrl + "/api/downloadfile", {
-            params: {
-              fileName: cur.fileName,
-              extend: cur.extend
-            },
-            responseType: "arraybuffer"
-            })
-            .then(res=>new Blob([res], {type: cur.extend}))
-            .then(blob=> new File([blob], cur.fileName))
-            .then(file=>{
-              cur.msg = file
-              let reader = new FileReader()
-              let fileNameTemp = cur.fileName
-              reader.onloadend = (es)=>{
-                  cur.msg = es.target.result
-                  cur.fileName = fileNameTemp
-              }
-              reader.readAsDataURL(file)
-            }).then(()=>{
-              setTimeout(()=>{
-                sendMsg(cur)
+          // else if(cur.chatType === 2){
+          //   axios.get(baseUrl + "/api/downloadfile", {
+          //   params: {
+          //     fileName: cur.fileName,
+          //     extend: cur.extend
+          //   },
+          //   responseType: "arraybuffer"
+          //   })
+          //   .then(res=>new Blob([res], {type: cur.extend}))
+          //   .then(blob=> new File([blob], cur.fileName))
+          //   .then(file=>{
+          //     cur.msg = file
+          //     let reader = new FileReader()
+          //     let fileNameTemp = cur.fileName
+          //     reader.onloadend = (es)=>{
+          //       cur.msg = es.target.result
+          //       cur.fileName = fileNameTemp
+          //     }
+          //     reader.readAsDataURL(file)
+          //   }).then(()=>{
+          //     setTimeout(()=>{
+          //       sendMsg(cur)
 
-              }, 500)
-            })
-          }
-          else sendMsg(cur)          
+          //     }, 500)
+          //   })
+          // }
+          if(cur.chatType === 2) valueUploadList.value.push(100) 
+          else valueUploadList.value.push(0)
+          sendMsg(cur, "now")          
         }
       }
     }

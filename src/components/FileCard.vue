@@ -38,33 +38,15 @@ const watchafter = ()=>{
     lock.value = true
   } 
 }
-const watchuploadafter = ()=>{
-  let bar = document.getElementsByClassName("xcprogress-bar")[0]
-    console.log(bar);
-  if(props.uploadvalue === 100){
 
-    bar.style.background = 'rgb(55, 103, 212)'
-  }
-}
+
 watch(
   ()=>props.value,
   ()=>watchafter(),
   {immediate:true},
   {deep: true}
 )
-watch(
-  ()=>props.uploadvalue,
-  ()=>watchuploadafter(),
-  {deep: true}
-)
 onMounted(()=>{
-  if(props.uploadvalue !== 100){
-    let bar = document.getElementsByClassName("xcprogress-bar")[0]
-    console.log(bar);
-    bar.style.background = 'rgb(65, 177, 58)'
-    // let bar = document.querySelector('xcprogress-bar')
-    // bar.style.background = 'rgb(65, 177, 58)'
-  }
 })
 </script>
 
@@ -85,11 +67,11 @@ onMounted(()=>{
         <span>{{props.size}}</span>
       </div>
     </div>
-    <div class="xcprogress" v-if="props.uploadvalue !== 100">
-        <div class="xcprogress-bar" :style="{ 'width': `${props. uploadvalue}%` }">
+    <div class="xcprogress" v-show="props.uploadvalue !== 100">
+        <div class="xcprogress-bar1" :style="{ 'width': `${props. uploadvalue}%` }">
         </div>
     </div>
-    <div class="xcprogress" v-if="props.value !== 0">
+    <div class="xcprogress" v-show="props.value !== 0">
         <div class="xcprogress-bar" :style="{ 'width': `${props.value}%` }">
         </div>
     </div>
@@ -166,7 +148,19 @@ onMounted(()=>{
     border-radius: 4px;
     animation: xcprogress-bar-anim 2s linear infinite;
 }
-
+.xcprogress-bar1 {
+    width: 0;
+    height: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background: rgb(65, 177, 58);
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+    background-size: 40px 40px;
+    transition: width .6s ease;
+    border-radius: 4px;
+    animation: xcprogress-bar-anim 2s linear infinite;
+}
 .xcprogress-bar-value {
     font-size: 5px;
     font-weight: bold;
