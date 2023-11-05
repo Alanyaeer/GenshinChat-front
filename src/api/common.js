@@ -43,3 +43,17 @@ export const fileMerge =  (params)=>{
         data: params
     }).then(res => res.data)
 }
+export const getSize = (params)=>{
+    return axios({
+        method: 'post',
+        baseURL: `${baseUrl}/api/getsize`,
+        data: params
+    }).then(res => res.data)
+}
+export const redownload = (params)=>{
+    return axios({
+        method: 'post',
+        baseURL: `${baseUrl}/api/redownload`,
+        data: params
+    }).then(res => res.data)
+}

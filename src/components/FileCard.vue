@@ -26,12 +26,11 @@ const props = defineProps({
   // }
 })
 const lock = ref(true)
-const emit = defineEmits('resetValue', 'sethundred')
+const emit = defineEmits(['resetValue', 'sethundred'])
 const watchafter = ()=>{
   if(props.value >= 100 && lock.value === true){
-    console.log(props.index);
     // props.value = 0
-    emit('resetValue', props.index)
+    // emit('resetValue', props.index)
     lock.value = false
   }
   else if(props.value === 0){

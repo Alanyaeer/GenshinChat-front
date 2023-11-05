@@ -10,7 +10,7 @@ import { VideoCamera,Phone, Document, PictureRounded } from '@element-plus/icons
 import { useUserStore } from '@/stores';
 import {formatTime} from '@/utils/format.js'
 import { ElMessage, ElNotification, uploadBaseProps } from 'element-plus';
-import {upload, uploadMsg, reUpload, fileMerge} from '@/api/common.js'
+import {upload, uploadMsg, reUpload, fileMerge, getSize,redownload} from '@/api/common.js'
 import axios from 'axios'
 import SparkMD5 from 'spark-md5' 
 import base from '../../../api/index'
@@ -27,7 +27,9 @@ const filesize = ref('')
 const stopupload = ref([])
 const downloadwhich = ref("")
 const valueUploadList = ref([])
-const recordfile = ref([])
+let arraymap = new Map()
+let recordfile = new Map()
+let stopdownload = new Map()
 let filenametemp = ""
 let socket;
 // const instance = getCurrentInstance()
@@ -54,7 +56,7 @@ const getFriendChatMsg = async () => {
     }
       chatList.value.forEach(async (item) => {
         if(!valueList.value) valueList.value = []
-        valueList.value.push(0)
+        valueList.value.push(0.0)
         if(!valueUploadList.value) valueUploadList.value = []
         valueUploadList.value.push(100)
         if(!stopupload.vlaue) stopupload.value = []
@@ -95,7 +97,7 @@ const sendMsg = async (msgList) => {
       chatList.value = []
   }
   if(!valueList.value) valueList.value = []
-  valueList.value.push(0)
+  valueList.value.push(0.0)
   chatList.value.push(msgList);
   console.log(msgList);
   // await saveChatMsg(msgList)
@@ -151,13 +153,8 @@ const clickEmoji = () => {
   showEmoji.value = !showEmoji.value;
 }
 const resetValue = (index)=>{
-  valueList.value[index] = 0
-  console.log(valueList.value[index], index);
-  ElNotification({
-    type: 'success',
-    title: '获得了一个文件🎉',
-    message: '下载成功🥳'
-  })
+  valueList.value[index] = 0.0
+
 }
 // 发送消息
 const sendText = async () => {
@@ -268,18 +265,9 @@ const calsize =  (size)=>{
   return size+'B'
 
 }
-// 发送文件
-const sendFile = async (e) => { 
-  
+const uploadAlgorithm = async(e, index, isorignsend) => {
+  console.log(index);
   let curobj = await mycontent();
-  if(!valueUploadList.value) valueUploadList.value = []
-  valueUploadList.value.push(0.0)
-  if(!stopupload.value) stopupload.value = []
-        stopupload.value.push(true)
-  const index = valueUploadList.value.length - 1
-  // if(!recordfile.value)  recordfile.value = []
-  // if(recordfile.value[])
-  // recordfile[stopupload.value.length - 1] = e;
   let chatFile = {
     msg: "",
     chatType: 2, //信息类型，0文字，1图片, 2文件
@@ -310,7 +298,6 @@ const sendFile = async (e) => {
     const uploadslice = async()=>{
     if(!files)return 
     const chunks = createChunks(files,1024 * 1024)
-    let uploadvalue = 0
     const result = await hash(chunks)
     let ispassfile = false
     let reuploadobj = {
@@ -319,45 +306,52 @@ const sendFile = async (e) => {
     let reuploadcnt = await reUpload(reuploadobj)
     // 现在上传了 reuploadcnt  个文件对吧
     // reuploadcnt * 1024
-    if(reuploadcnt !== chunks.length)
-      valueUploadList.value[index] += (reuploadcnt * 1024 * 1024 * 100) / filesizes
+    if(reuploadcnt !== chunks.length){
+      valueUploadList.value[index] = (reuploadcnt * 1024 * 1024 * 100) / filesizes
+      console.log(reuploadcnt * 1024 * 1024 * 100, filesizes);
+    }
     else 
       valueUploadList.value[index] = 100.0
+    console.log(chunks.length);
     for(let i = reuploadcnt; i < chunks.length; ++i){
-      if(stopupload.value[index] === false) break
-      // let file = chunks[i]
-      let chunkcnt = i
-      let md5 = result
-      const formData = new FormData()
-      const blob = chunks[i]
-    
-      formData.append('file', blob)
-      formData.append('hash', result)
-      formData.append('chunkcnt', i)
-      formData.append('filename', files.name)
-      formData.append('totalCnt', chunks.length - 1)  
-      await axios.post('/api/uploadslice', (formData),{
-          onUploadProgress: function(progressEvent){
-            function sendHeartbeat() {  
-              setTimeout(function() {  
-                if (socket.readyState === WebSocket.OPEN) {  
-                  socket.send(''); // 发送空的心跳包给服务器  
-                  sendHeartbeat(); // 递归调用发送心跳包函数，以保持连接活跃  
-                } else {  
-                  console.log('WebSocket连接已关闭');  
-                }  
-              }, 5000); // 每30秒发送一次心跳包给服务器  
+      // const loop = async(index, i, result, filesizes)=>{
+        if(stopupload.value[index] === true){
+          return
+        }
+        // let file = chunks[i]
+        let chunkcnt = i
+        let md5 = result
+        const formData = new FormData()
+        const blob = chunks[i]
+        formData.append('file', blob)
+        formData.append('hash', result)
+        formData.append('chunkcnt', i)
+        formData.append('filename', files.name)
+        formData.append('totalCnt', chunks.length - 1)  
+        await axios.post('/api/uploadslice', (formData),{
+            onUploadProgress: function(progressEvent){
+              function sendHeartbeat() {  
+                setTimeout(function() {  
+                  if (socket.readyState === WebSocket.OPEN) {  
+                    socket.send(''); // 发送空的心跳包给服务器  
+                    sendHeartbeat(); // 递归调用发送心跳包函数，以保持连接活跃  
+                  } else {  
+                    console.log('WebSocket连接已关闭');  
+                  }  
+                }, 5000); // 每30秒发送一次心跳包给服务器  
+              }
+                valueUploadList.value[index] +=( (progressEvent.loaded * 100) / filesizes)
+                if(stopupload.value[index] === true){
+                  return
+                }
+              } 
+          })
+          if(stopupload.value[index] === true){
+              return
             }
-              
-      // 在控制台打印上传百分比
-              // console.log("{}: {}",progressEvent.loaded * 100 );
-              console.log(progressEvent.loaded * 100,progressEvent.total);
-              console.log(progressEvent.loaded * 100, filesize);
-            
-              valueUploadList.value[index] +=( (progressEvent.loaded * 100) / filesizes)
-              console.log('上传进度：' + valueUploadList.value[index] + '%');
-            } 
-        })
+
+      // }
+      
     }
     let merge = {
       hash:  result,
@@ -375,6 +369,7 @@ const sendFile = async (e) => {
       message: '上传成功🥳'
     })
   }
+  
   // if(stopupload.value[index] === false) break
     function createChunks(files, chunkSize) {
       const results = []
@@ -470,6 +465,7 @@ const sendFile = async (e) => {
         chatFile.fileType = 0;
     }
     console.log('minasan我要发送数据了');
+    if(isorignsend === true)
     sendMsg(chatFile);
     chatFile.size = filesize.value
     chatFile.fileName = files.name
@@ -491,6 +487,25 @@ const sendFile = async (e) => {
     //  e.target.files = null;
   }
 }
+// 发送文件
+const sendFile = async (e) => { 
+  
+
+  if(!valueUploadList.value) valueUploadList.value = []
+  valueUploadList.value.push(0.0)
+  if(!stopupload.value) stopupload.value = []
+    stopupload.value.push(false)
+  if(!recordfile.value) recordfile.value = []
+  const index = valueUploadList.value.length - 1
+  console.log(index);
+  // recordfile[index] = e
+  recordfile.set(index, e)
+  uploadAlgorithm(e ,index, true)
+  // if(!recordfile.value)  recordfile.value = []
+  // if(recordfile.value[])
+  // recordfile[stopupload.value.length - 1] = e;
+  
+}
 function sendHeartbeat() {  
   setTimeout(function() {  
     if (socket.readyState === WebSocket.OPEN) {  
@@ -509,12 +524,151 @@ const telephone = () => {
 const video = () => {
   ElMessage.info("视频功能开发中")
 }
+
+const fileDownloadAgrithm = async(index, item)=>{
+  stopdownload.set(index, false)
+    downloadwhich.value = index
+    console.log(index);
+    let getsizeobj = {
+      fileName: item.fileName
+    }
+    //  普通的下载
+    let sizehigh = await getSize(getsizeobj)
+    if(sizehigh <= 1024 * 1024){
+      axios.get(baseUrl + "/api/downloadfile", {
+        params: {
+          fileName: item.fileName,
+          extend: item.extend
+        },
+        responseType: "arraybuffer",
+        onDownloadProgress(progressEvent) {
+          
+          valueList.value[index] = (progressEvent.loaded * 100) / progressEvent.total;
+          console.log(valueList.value[index]);
+        }
+      }).then(res=>new Blob([res], {type: item.extend})
+      )
+      .then(blob=>{
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.download = item.fileName
+        a.href = url 
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        resetValue(index)
+      })
+    }
+    else{
+      let redownloadobj = {
+        fileName: item.fileName,
+        userid: userstore.userid
+      }
+      
+      function concatArrayBuffer(arrayBufferArray) {
+      let totalLength = 0;
+      arrayBufferArray.forEach(arrayBuffer => {
+        totalLength += arrayBuffer.byteLength;
+      });
+      const result = new Uint8Array(totalLength);
+      let offset = 0;
+      arrayBufferArray.forEach(arrayBuffer => {
+        result.set(new Uint8Array(arrayBuffer), offset);
+        offset += arrayBuffer.byteLength;
+      });
+      return result;
+    }
+    let arrayBufferArray = []
+    if(arraymap.has(index))
+    arrayBufferArray = arraymap.get(index);
+    console.log('是否有记录', arraymap.has(index), arrayBufferArray);
+    // 获取文件的大小
+  
+    
+
+    console.log('长度为：', sizehigh);
+    let downloadcnt = await redownload(redownloadobj)
+
+    // 文件下载
+    let len = 1024 * 1024 
+    let finish = 0
+    let startsize = 0
+    let totalcnt = Math.ceil(sizehigh / (1024 * 1024)) - 1
+    console.log(totalcnt, downloadcnt, valueList.value[index]);
+    let curcnt = 0
+    if(downloadcnt === totalcnt){
+      startsize = sizehigh
+      valueList.value[index] = 100.0
+      curcnt = totalcnt
+    }
+    else{
+      startsize = (1024 * 1024) * downloadcnt
+      valueList.value[index] = (1024 * 1024 * 100 * downloadcnt) / sizehigh
+      curcnt = downloadcnt
+    } 
+    console.log('现在开始下载从:', startsize, '已经传输了', downloadcnt)
+    for(let i = startsize;i < sizehigh; i += len){
+      len = Math.min(sizehigh - i, 1024 * 1024)
+      await axios.get('/api/downloadslicefile',{
+        params: {
+          fileName: item.fileName,
+          extend: item.extend,
+          start: i,
+          end: i + len - 1,
+          curcnt: curcnt,
+          userid: userstore.userid,
+          totalcnt: totalcnt
+        }, 
+        headers: {
+          range: `bytes=${i}-${i + len - 1}`
+        },
+        responseType: "arraybuffer",
+        onDownloadProgress(progressEvent){
+          if(valueList.value[index] <= 100)
+          valueList.value[index] += (progressEvent.loaded * 100) / sizehigh;
+          console.log('当前进度条位： ', valueList.value[index] );
+          if(stopdownload.get(index) === true){
+            arraymap.set(index, arrayBufferArray)
+            return
+          }
+        }
+      }).then(clip=>{
+        arrayBufferArray.push(clip)
+        // console.log(clip);
+        curcnt += 1
+      })
+      if(i + len === sizehigh){
+        let res = concatArrayBuffer(arrayBufferArray)
+        const blob = await new Blob([res], {type: item.extend})
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.download = item.fileName
+        a.href = url 
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)    
+        ElNotification({
+          type: 'success',
+          title: '获得了一个文件🎉',
+          message: '下载成功🥳'
+        })  
+        arraymap.delete(index)
+        resetValue(index)
+      }
+      if(stopdownload.get(index) === true){
+        arraymap.set(index, arrayBufferArray)
+        return
+      }
+    }
+    }
+}
 // 文件点击后下载
 const clickfile = async (item, index)=>{
   
   if(valueUploadList.value[index] !== 100){
+    
     stopupload.value[index] = !stopupload.value[index]
-    if(stopupload.value[index] === false){
+    if(stopupload.value[index] === true){
         ElNotification({
         type: 'warning',
         title: '通知',
@@ -526,33 +680,39 @@ const clickfile = async (item, index)=>{
       type: 'warning',
       title: '通知',
       message: '文件开始继续上传🤐'
+      
     })
+    uploadAlgorithm(recordfile.get(index), index, false)
     }
     return 
   }
-  downloadwhich.value = index
-  console.log(index);
-  axios.get(baseUrl + "/api/downloadfile", {
-    params: {
-      fileName: item.fileName,
-      extend: item.extend
-    },
-    responseType: "arraybuffer",
-    onDownloadProgress(progressEvent) {
-      valueList.value[index] = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-      console.log(valueList.value[index]);
+  else {
+    if(!stopdownload.has(index)){
+      console.log('我进来了');
+      stopdownload.set(index, false) 
     }
-  }).then(res=>new Blob([res], {type: item.extend}))
-  .then(blob=>{
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.download = item.fileName
-    a.href = url 
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-  })
+    else{
+      stopdownload.set(index,!stopdownload.get(index))
 
+    }
+    console.log('切换形态', stopdownload.get(index));
+    if(stopdownload.get(index) === true){
+        ElNotification({
+        type: 'warning',
+        title: '通知',
+        message: '文件暂停下载🤐'
+      })
+    }
+    else {
+      ElNotification({
+        type: 'warning',
+        title: '通知',
+        message: '文件开始下载🤐'
+        
+      })
+      fileDownloadAgrithm(index, item)
+    }
+  }
 }
 const init = ()=>{
   let userId = userstore.userid
