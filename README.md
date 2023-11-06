@@ -1,35 +1,24 @@
 # chat-front
 
-This template should help get you started developing with Vue 3 in Vite.
+## 后端程序
 
-## Recommended IDE Setup
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
 
-## Customize configuration
+## 前端程序
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+[chat-front 前端](https://github.com/Alanyaeer/GenshinChat-front)
 
-## Project Setup
 
-```sh
-pnpm install
-```
 
-### Compile and Hot-Reload for Development
+## 技术栈
 
-```sh
-pnpm dev
-```
+> websocket springboot vue
 
-### Compile and Minify for Production
+## 启动方式🎢
 
-```sh
-pnpm build
-```
+### 前端
 
-### Lint with [ESLint](https://eslint.org/)
+在vscode中 打开控制台输入下面的指令
 
-```sh
-pnpm lint
-```
+`npm install`
+
