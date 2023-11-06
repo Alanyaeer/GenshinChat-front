@@ -34,7 +34,6 @@ axios.interceptors.response.use(function (response) {
     return Promise.reject(red)
 
   }
-  console.log(red.data);
   // Do something with response data
   return red
 }, function (error) {
@@ -62,7 +61,7 @@ axios.interceptors.response.use(function (response) {
 
 const base = {
   axios: axios,
-  baseUrl: 'http://localhost:180'
+  baseUrl: 'http://192.168.46.177:180'
 }
 
 export default base

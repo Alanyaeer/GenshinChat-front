@@ -48,7 +48,6 @@ const getFriendChatMsg = async () => {
     friendId: props.friendInfo.id,
     myId: userstore.userid
   };
-  console.log(params);
   await getChatMsg(params).then((res) => {
     chatList.value = res;
     if(!chatList.value){
@@ -73,13 +72,11 @@ const getFriendChatMsg = async () => {
           .then(blob=> new File([blob], item.fileName))
           .then(file=>{
             item.msg = file
-            console.log(file);
             let reader = new FileReader()
             let fileNameTemp = item.fileName
             reader.onloadend = (es)=>{
                 item.msg = es.target.result
                 item.fileName = fileNameTemp
-                console.log(item.msg)
                 if(item.chatType === 1){
                   srcImgList.value.push(item.msg)
                 }
@@ -99,7 +96,6 @@ const sendMsg = async (msgList) => {
   if(!valueList.value) valueList.value = []
   valueList.value.push(0.0)
   chatList.value.push(msgList);
-  console.log(msgList);
   // await saveChatMsg(msgList)
   scrollBottom();
 }
@@ -112,10 +108,6 @@ const scrollBottom = () => {
   })
 }
 const mycontent = async () => {
-  for(let i = 0; i < chatList.length; ++i){
-    console.log(chatlist.value[i].uid);
-
-  }
   let userInfo = await userstore.getUser()
   return {
     headImg: userInfo.userimg,
@@ -248,7 +240,6 @@ const sendImg = async (e) => {
     sendMsg(chatfiles);
 
     uploadMsg(chatfiles)
-    console.log(chatfiles);
     sendSocket(chatfiles)
 
   };
@@ -266,7 +257,6 @@ const calsize =  (size)=>{
 
 }
 const uploadAlgorithm = async(e, index, isorignsend) => {
-  console.log(index);
   let curobj = await mycontent();
   let chatFile = {
     msg: "",
@@ -308,11 +298,9 @@ const uploadAlgorithm = async(e, index, isorignsend) => {
     // reuploadcnt * 1024
     if(reuploadcnt !== chunks.length){
       valueUploadList.value[index] = (reuploadcnt * 1024 * 1024 * 100) / filesizes
-      console.log(reuploadcnt * 1024 * 1024 * 100, filesizes);
     }
     else 
       valueUploadList.value[index] = 100.0
-    console.log(chunks.length);
     for(let i = reuploadcnt; i < chunks.length; ++i){
       // const loop = async(index, i, result, filesizes)=>{
         if(stopupload.value[index] === true){
@@ -340,7 +328,10 @@ const uploadAlgorithm = async(e, index, isorignsend) => {
                   }  
                 }, 5000); // 每30秒发送一次心跳包给服务器  
               }
-                valueUploadList.value[index] +=( (progressEvent.loaded * 100) / filesizes)
+                if( valueUploadList.value[index] + ( (progressEvent.loaded * 100) / filesizes) <= ((i + 1) * 1024 * 1024 * 100) / filesizes)
+                valueUploadList.value[index] += ( (progressEvent.loaded * 100) / filesizes)
+                else 
+                valueUploadList.value[index] = ((i + 1) * 1024 * 1024 * 100) / filesizes
                 if(stopupload.value[index] === true){
                   return
                 }
@@ -418,10 +409,8 @@ const uploadAlgorithm = async(e, index, isorignsend) => {
         
         valueUploadList.value[index] = Math.round((progressEvent.loaded * 100) / progressEvent.total)
       // 在控制台打印上传百分比
-        console.log('上传进度：' + valueUploadList.value[index] + '%');
       }
     }).then(function(response){
-      console.log('上传成功');
       sendSocket(chatFile)
       ElNotification({
         type: 'success',
@@ -464,7 +453,6 @@ const uploadAlgorithm = async(e, index, isorignsend) => {
       default:
         chatFile.fileType = 0;
     }
-    console.log('minasan我要发送数据了');
     if(isorignsend === true)
     sendMsg(chatFile);
     chatFile.size = filesize.value
@@ -497,13 +485,9 @@ const sendFile = async (e) => {
     stopupload.value.push(false)
   if(!recordfile.value) recordfile.value = []
   const index = valueUploadList.value.length - 1
-  console.log(index);
   // recordfile[index] = e
   recordfile.set(index, e)
   uploadAlgorithm(e ,index, true)
-  // if(!recordfile.value)  recordfile.value = []
-  // if(recordfile.value[])
-  // recordfile[stopupload.value.length - 1] = e;
   
 }
 function sendHeartbeat() {  
@@ -606,7 +590,6 @@ const fileDownloadAgrithm = async(index, item)=>{
       valueList.value[index] = (1024 * 1024 * 100 * downloadcnt) / sizehigh
       curcnt = downloadcnt
     } 
-    console.log('现在开始下载从:', startsize, '已经传输了', downloadcnt)
     for(let i = startsize;i < sizehigh; i += len){
       len = Math.min(sizehigh - i, 1024 * 1024)
       await axios.get('/api/downloadslicefile',{
@@ -624,11 +607,14 @@ const fileDownloadAgrithm = async(index, item)=>{
         },
         responseType: "arraybuffer",
         onDownloadProgress(progressEvent){
-          if(valueList.value[index] <= 100)
-          valueList.value[index] += (progressEvent.loaded * 100) / sizehigh;
-          console.log('当前进度条位： ', valueList.value[index] );
+          if(valueList.value[index] + (progressEvent.loaded * 100) / sizehigh > ((curcnt + 1) * 1024 * 1024) / sizehigh * 100)
+            valueList.value[index] = ((curcnt + 1) * 1024 * 1024) / sizehigh * 100
+          else
+            valueList.value[index] += (progressEvent.loaded * 100) / sizehigh;
+          console.log('当前进度条位： ', valueList.value[index] + '  正在传送 ' + curcnt + '   ' + ((curcnt + 1) * 1024 * 1024) / sizehigh * 100);
           if(stopdownload.get(index) === true){
             arraymap.set(index, arrayBufferArray)
+            console.log(curcnt);
             return
           }
         }
@@ -720,17 +706,16 @@ const init = ()=>{
     console.log("您的浏览器不支持WebSocket")
   }
   else{
-    let socketUrl = "ws://localhost:8080/imserver/" + userId
+    let socketUrl = "ws://192.168.46.177:8080/imserver/" + userId
     if(socket != null){
       console.log(socket);
-
       socket.close()
       socket = null
     }
     socket = new WebSocket(socketUrl)
     socket.onopen = function () {
         console.log("websocket已打开");
-        sendHeartbeat(); 
+
     };
     socket.onmessage = function (msg) {
       if(msg === ""){
@@ -741,7 +726,6 @@ const init = ()=>{
       let data = JSON.parse(msg.data)  // 对收到的json数据进行解析， 类似这样的： {"users": [{"username": "zhang"},{ "username": "admin"}]}
       if (data.users) {  // 获取在线人员信息
         // _this.users = data.users.filter(user => user.username !== username)  // 获取当前连接的所有用户信息，并且排除自身，自己不会出现在自己的聊天列表里
-        console.log('等待开发');
       } else {
         // 如果服务器端发送过来的json数据 不包含 users 这个key，那么发送过来的就是聊天文本json数据
         //  // {"from": "zhang", "text": "hello"}
@@ -756,12 +740,13 @@ const init = ()=>{
         }
       }
     }
-    socket.onclose = function () {
-      console.log('websocket关闭')
+    socket.onclose = function (e) {
+      console.log('websocket关闭', e.code+ ' '+e.reason+' ' + e.wasClean)
     }
     socket.onerror = function () {
-      console.log('websocket发送错误');
+      console.log('websocket发送错误', );
     }
+    // sendHeartbeat()
   }
 }
 onMounted(()=>{
@@ -783,7 +768,7 @@ watch(
   <div class="chat-window">
     <div class="top">
       <div class="head-pic">
-        <HeadPortrait :imgUrl="props.friendInfo.headImg" :status="props.friendInfo.status"></HeadPortrait>
+        <HeadPortrait :imgUrl="props.friendInfo.headImg" :status="props.friendInfo.status" :needStatus="false"></HeadPortrait>
       </div>
       <div class="info-detail">
         <div class="name">{{ props.friendInfo.name }}</div>

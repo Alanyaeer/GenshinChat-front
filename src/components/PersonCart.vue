@@ -26,7 +26,7 @@ watch(
 <template>
   <div class="person-card" :class="{ activeCard: personInfo.id == current }">
     <div class="info">
-          <HeadPortrait :imgUrl="personInfo.headImg" :status="personInfo.status"></HeadPortrait>
+          <HeadPortrait :imgUrl="personInfo.headImg" :status="personInfo.status" :needStatus="false"></HeadPortrait>
           <div class="info-detail">
             <div class="name">{{ personInfo.name }}</div>
             <div class="detail">{{ personInfo.detail }}</div>
