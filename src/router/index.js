@@ -23,7 +23,7 @@ const router = createRouter({
     },
     {
       path: '/test',
-      component: () => import('@/views/TestPage.vue')
+      component: () => import('@/views/manage/TestPage.vue')
     },
     {
       path: '/404',
@@ -36,7 +36,7 @@ const router = createRouter({
     {
       path: '/dialog',
       component: ()=> import('@/components/Dialog.vue')
-    }
+    },
   ]
 })
 router.beforeEach((to, from, next) =>{

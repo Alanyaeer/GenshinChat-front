@@ -11,6 +11,7 @@ import { useUserStore } from '@/stores';
 import {formatTime} from '@/utils/format.js'
 import { ElMessage, ElNotification, uploadBaseProps, ElLoading } from 'element-plus';
 import {upload, uploadMsg, reUpload, fileMerge, getSize,redownload} from '@/api/common.js'
+import TestPage from '../../manage/TestPage.vue';
 import SparkMD5 from 'spark-md5' 
 import axios from 'axios'
 import base from '../../../api/index'
@@ -28,6 +29,7 @@ const filesize = ref('')
 const stopupload = ref([])
 const downloadwhich = ref("")
 const valueUploadList = ref([])
+const loading = ref(false)
 let arraymap = new Map()
 let recordfile = new Map()
 let stopdownload = new Map()
@@ -45,6 +47,8 @@ const emit = defineEmits(['personCardSort'])
 // methods
 // 获取聊天记录
 const getFriendChatMsg = async () => {
+  loading.value = true
+
   let params = {
     friendId: props.friendInfo.id,
     myId: userstore.userid
@@ -87,6 +91,12 @@ const getFriendChatMsg = async () => {
         }
       });
   });
+  setTimeout(()=>{
+
+    loading.value = false
+
+  }, 500)
+
 }
 // 发送信息
 const sendMsg = async (msgList) => {
@@ -701,6 +711,7 @@ const clickfile = async (item, index)=>{
   }
 }
 const init = ()=>{
+  loading.value=true
   let userId = userstore.userid
   if(typeof (WebSocket) == "undefined"){
     console.log("您的浏览器不支持WebSocket")
@@ -746,11 +757,16 @@ const init = ()=>{
     socket.onerror = function () {
       console.log('websocket发送错误', );
     }
+
     // sendHeartbeat()
   }
+  setTimeout(()=>{
+    loading.value = false
+
+  }, 500)
+
 }
 onMounted(()=>{
-
   getFriendChatMsg()
   init()
 
@@ -768,6 +784,8 @@ watch(
 
 <template>
   <div class="chat-window">
+    <TestPage :isshow="loading"></TestPage>
+
     <div class="top">
       <div class="head-pic">
         <HeadPortrait :imgUrl="props.friendInfo.headImg" :status="props.friendInfo.status" :needStatus="false"></HeadPortrait>

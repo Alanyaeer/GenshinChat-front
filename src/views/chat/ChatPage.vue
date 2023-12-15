@@ -27,7 +27,8 @@ import { useUserStore } from  '@/stores'
 import ManagePage from '../manage/ManagePage.vue'
 import MutiChat from '../manage/MutiChat.vue'
 import { ElLoading } from 'element-plus'
-
+import TestPage  from '../manage/TestPage.vue'
+const loading = ref(false)
 const router = useRouter()
 // import { router } from 'vue-router';
 const iconsize = ref(32)
@@ -132,11 +133,7 @@ const closeMuti = ()=>{
     isShowMutiChat.value = false
 }
 onMounted(async () => {
-    const instanceLoading = ElLoading.service({
-        fullscreen: true,
-        lock: true,
-        background: 'rgba(0, 0, 0, 0.7)',
-    })
+    loading.value = true
     const user = await userStore.getUser()
     let id = {
         id: user.userid
@@ -153,10 +150,7 @@ onMounted(async () => {
         },10000)
     }
     runForfriend()
-    nextTick(()=>{
-        console.log('加载完毕');
-        instanceLoading.close()
-    })
+    loading.value = false
 })
 watch(
   ()=> userStore.userimg,
@@ -170,7 +164,7 @@ watch(
 
 <template>
         <!-- zoomIn -->
-        
+        <TestPage :isshow="loading"></TestPage>
         <Transition>
             <ManagePage v-if="isshowDialog" @closeDialog="closeDialog" @clickPersonorigin="clickPerson" :come = "typeDialog" ></ManagePage>
             
