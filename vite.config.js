@@ -17,6 +17,11 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()]
     })
   ],
+  server: {
+    host: '0.0.0.0',  // 关键配置：监听本机所有 IP
+    port: 5173,        // 可选：固定端口（默认 5173，冲突时会自动递增）
+    open: true         // 可选：启动后自动打开浏览器（默认打开 localhost，可忽略）
+  },
   base: './',
   resolve: {
     alias: {

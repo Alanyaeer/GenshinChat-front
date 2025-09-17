@@ -1,9 +1,10 @@
 version: '3.8'
 services:
-  genshinchat-front:
-    build:
-      context: ../
-      dockerfile: Dockerfile
+  nginx:
+    container_name: nginx
+    image: nginx:latest
     ports:
       - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     

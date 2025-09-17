@@ -28,10 +28,10 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 # 复制自定义nginx配置（如果有）
 # 若需自定义配置，可在项目根目录创建nginx.conf，取消下面一行注释
-COPY ./docs/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./docs/nginx/nginx-deploy.conf /etc/nginx/nginx.conf
 
 # 暴露端口
-EXPOSE 180
+EXPOSE 80
 
 # 启动nginx
 CMD ["nginx", "-g", "daemon off;"]
