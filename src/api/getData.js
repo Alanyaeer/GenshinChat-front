@@ -6,7 +6,7 @@ let baseUrl = base.baseUrl
 export const getFriend = (params) => {
     return axios({
       method: 'post',
-      baseURL: `${baseUrl}/friend/friendList`,
+      baseURL: `${baseUrl}/api/friend/friendList`,
       data: params
     }).then(res => res.data)
 }
@@ -15,14 +15,14 @@ export const getFriend = (params) => {
 export const getChatMsg = (params) => {
   return axios({
     method: 'post',
-    baseURL: `${baseUrl}/friend/chatMsg`,
+    baseURL: `${baseUrl}/api/friend/chatMsg`,
     data: params
   }).then(res => res.data)
 }
 export const saveChatMsg = (params)=>{
   return axios({
     method: 'post',
-    baseURL: `${baseUrl}/friend/saveMsg`,
+    baseURL: `${baseUrl}/api/friend/saveMsg`,
     data:  params
   }).then(res=>res.data)
 }

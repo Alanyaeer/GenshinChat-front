@@ -61,7 +61,7 @@ axios.interceptors.response.use(function (response) {
 
 const base = {
   axios: axios,
-  baseUrl: 'http://192.168.46.177:180'
+  baseUrl: 'http://110.41.55.173:180'
 }
 
 export default base
