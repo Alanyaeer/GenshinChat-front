@@ -14,7 +14,6 @@ import { ElMessage, ElNotification, uploadBaseProps } from 'element-plus';
 import {upload, uploadMsg, reUpload, fileMerge, getSize,redownload} from '@/api/common.js'
 import axios from 'axios'
 import SparkMD5 from 'spark-md5' 
-import base from '../../../api/index'
 const baseUrl = base.baseUrl
 // 声明变量
 const userstore = useUserStore()
