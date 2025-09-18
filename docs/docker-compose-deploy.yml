@@ -6,6 +6,8 @@ services:
     build:
       context: ../
       dockerfile: Dockerfile
+      args:
+        - NODE_ENV=development
     ports:
       - "80:80"
     
