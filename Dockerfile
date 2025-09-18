@@ -6,19 +6,21 @@ WORKDIR /app
 
 # 复制依赖文件
 COPY package.json pnpm-lock.yaml ./
-# 3. 安装依赖（国内环境可加 --registry 配置 npm 镜像加速）
-RUN npm install --registry=https://registry.npmmirror.com
-# 安装pnpm
+# # 3. 安装依赖（国内环境可加 --registry 配置 npm 镜像加速）
+RUN npm config set registry https://registry.npmmirror.com
+# # 安装pnpm
 RUN npm install -g pnpm
-
 # 安装依赖
 RUN pnpm install
+
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 
 # 复制项目文件
 COPY . .
 
 # 构建项目
-RUN pnpm run build
+RUN pnpm run build --mode ${NODE_ENV}
 
 # 部署阶段
 FROM nginx:alpine
