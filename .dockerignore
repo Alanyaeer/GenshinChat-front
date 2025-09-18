@@ -1,0 +1,9 @@
+# .dockerignore
+node_modules/
+.git
+.gitignore
+README.md
+*.log
+.DS_Store
+dist
+# 添加其他需要排除的文件或目录
