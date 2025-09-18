@@ -1,6 +1,6 @@
 import base from './index'
 let axios = base.axios
-let baseUrl = base.baseUrl
+let baseUrl = import.meta.env.VITE_APP_API_URL
 export const loginuser = ({id, password}) =>{
     return axios({
         method: 'post',

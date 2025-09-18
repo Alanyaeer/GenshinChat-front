@@ -61,7 +61,8 @@ axios.interceptors.response.use(function (response) {
 
 const base = {
   axios: axios,
-  baseUrl: 'http://110.41.55.173:180'
+  baseUrl: import.meta.env.VITE_APP_API_URL,
+  wsUrl: import.meta.env.VITE_APP_WS_URL
 }
 
 export default base

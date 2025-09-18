@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import 'animate.css';
 // import {Created} from 'vue-router'
 import {
@@ -142,6 +142,11 @@ const login = async()=>{
     router.push('chat')
   }
 }
+onMounted(() => {
+    // 在控制台打印环境信息
+    console.log(import.meta.env);
+    // 默认主题
+})
 </script>
 <template>
     <el-row :class="{container: themesvalue, container1: !themesvalue}">

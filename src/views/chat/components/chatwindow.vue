@@ -1,6 +1,7 @@
 <script setup>
 import { animation} from '../../../utils/util.js'
 import { getChatMsg } from "../../../api/getData.js";
+import { base } from '@/api/index'
 import HeadPortrait from "../../../components/HeadPortrait.vue";
 import Emoji from "../../../components/Emoji.vue";
 import FileCard from "../../../components/FileCard.vue";
