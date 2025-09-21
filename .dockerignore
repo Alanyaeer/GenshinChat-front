@@ -6,4 +6,5 @@ README.md
 *.log
 .DS_Store
 dist
+LICENSE
 # 添加其他需要排除的文件或目录
